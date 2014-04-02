@@ -1,11 +1,12 @@
+/**
+ * Dynamic Generating Server query
+ * Created by Alfred Yang
+ * 2nd April, 2014
+ */
+
 package sensis
 
 import sensis.apiclient.APIProxy
-import java.net.URLEncoder._
-
-case class APIQueryArgsBase(name: String, originValue: String) {
-	override def toString = "&" + name + "=%s".format(encode(originValue, "UTF-8"))
-}
 
 case class APIServer(name: String, url: String, key: String) {
 	private var queries : List[APIQuery] = Nil
@@ -17,14 +18,12 @@ case class APIServer(name: String, url: String, key: String) {
 
 	def setProxy(p : APIProxy) = concrete = p
 	
-	def newQuery(args: List[APIQueryArgsBase]) = queries = new APIQuery(args)::queries
+	def newQuery(args: APIArgumentsBase) = queries = new APIQuery(args)::queries
 
-	case class APIQuery(args: List[APIQueryArgsBase]) {
+	case class APIQuery(args: APIArgumentsBase) {
 		
 	  	private def queryArgs : String = {
-		  	var r : String = ""
-		  	for (arg <- args) r += arg.toString
-		  	r
+	  	  	args.toString()
 		}
 		
 		def queryServer : String = {

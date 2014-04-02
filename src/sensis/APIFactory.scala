@@ -34,12 +34,11 @@ object APIFactory {
 		  	
 		  	var re = new APIServer(service_name, service_url, service_key)
 		  	// for query
-		  	val service_queries = (se \ "query").map { qu =>
+		  	(se \ "query").map { qu =>
 		  		// for query arguments
-		  		val args = (qu \ "arg").map { ag =>
-		  	    		new APIQueryArgsBase((ag \ "@name"). text, (ag \ "@value").text)
-		  		}
-		  		re.newQuery(args.toList)
+		  	  	val name = (qu \ "@factory").text
+		  	  	val args = APIArgumentFactoryDispatch.ArgsInstance(name, qu)
+		  		re.newQuery(args)
 		  	}
 		  	re.setProxy(ProxyFactory.getAPIProxy(re.name))
 		  	re

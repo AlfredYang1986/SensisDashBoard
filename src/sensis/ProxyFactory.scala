@@ -1,3 +1,9 @@
+/**
+ * Proxy Factory
+ * Created by Alfred Yang
+ * 2nd April, 2014
+ */
+
 package sensis
 
 import sensis.apiclient._

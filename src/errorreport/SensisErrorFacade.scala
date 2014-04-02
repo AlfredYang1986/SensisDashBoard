@@ -1,3 +1,9 @@
+/**
+ * Error report
+ * Created by Alfred Yang
+ * 2nd April, 2014
+ */
+
 package errorreport
 
 object SensisErrorFacade {

@@ -1,8 +1,23 @@
 <Services>
 	<Service name="APIConcreteProxyDemo" url="http://api.sensis.com.au/20110229/search?" key="vxbhkb39hsh4yyubx8yrrgj9">
-		<query>
+		<query factory="Route">
 			<arg type="String" name="query" value="Pizza" />
 			<arg type="String" name="location" value="South Yarra" />
+		</query>
+		<query factory="Route">
+			<arg type="String" name="query" value="Pizza" />
+			<arg type="String" name="location" value="City" />
+		</query>
+	</Service>	
+
+	<Service name="APIConcreteProxyDemo" url="http://api.sensis.com.au/20110229/search?" key="vxbhkb39hsh4yyubx8yrrgj9">
+		<query factory="Route">
+			<arg type="String" name="query" value="Pizza" />
+			<arg type="String" name="location" value="South Yarra" />
+		</query>
+		<query factory="Route">
+			<arg type="String" name="query" value="Pizza" />
+			<arg type="String" name="location" value="City" />
 		</query>
 	</Service>	
 </Services>
