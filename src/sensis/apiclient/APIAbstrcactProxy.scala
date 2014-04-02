@@ -16,7 +16,7 @@ import scala.util.parsing.json._
 
 trait APIProxy {
 	def request(url: String, key: String, args: String) : String = {
-		val query = url + "key=%s".format(key) + args
+		val query = url + key + args
 		Source.fromURL(query).mkString
 	}
 }

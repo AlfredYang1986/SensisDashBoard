@@ -12,7 +12,7 @@ import sensis.apiclient._
 
 object APIFactory {
 
-	def xmlPath : String = "/Users/yangyuan/Desktop/Scala/RMIT2014/StructFile/Services.xml"
+	def xmlPath : String = "StructFile/Services.xml"
   
 	private def service_xml_pharse(path: String) : scala.xml.Elem = {
 		val doc = scala.xml.XML.loadFile(path)
@@ -30,9 +30,20 @@ object APIFactory {
 		  	// for Server
 		  	val service_name = (se \ "@name").text
 		  	val service_url = (se \ "@url").text
-		  	val service_key = (se \ "@key").text
+//		  	val service_key = (se \ "@key").text
 		  	
-		  	var re = new APIServer(service_name, service_url, service_key)
+		  	// for key
+		  	var sk = (se \ "key").apply(0)
+		  	val kf = (se \ "key" \ "@factory").text
+		  	val keyInstance = APIServiceKeyDispatchFactory.APIKeyDispatch(kf)
+		  	(sk \ "arg").map { ka =>
+		  	  	keyInstance.AddKeyArg((ka \ "@name").text, (ka \ "@value").text)
+		  	  }
+		  	(sk \ "urlName").map { un =>
+		  	  	keyInstance.AppendUrlString((un \ "@name").text, (un \ "@delegate").text, keyInstance.args)
+		  	  }
+		  	
+		  	var re = new APIServer(service_name, service_url, keyInstance.UrlString)
 		  	// for query
 		  	(se \ "query").map { qu =>
 		  		// for query arguments
