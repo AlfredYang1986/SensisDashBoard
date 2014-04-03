@@ -6,9 +6,10 @@
 			<urlName name="apikey" delegate="copy(key)" />
 			<urlName name="sig" delegate="md5(key,secret,time)"/>
 		</key>
-		<query factory="Route">
-			<arg type="String" name="query" value="Pizza" />
-			<arg type="String" name="location" value="South Yarra" />
+		<query factory="MasheryArgs">
+			<arg type="String" name="method" value="member.fetch" />
+			<arg type="List" name="params" value="Sensis" />
+			<arg type="Int" name="id" value="1" />
 		</query>
 	</Service> 
 </Services>

@@ -9,9 +9,10 @@ package sensis
 
 import java.net.URLEncoder._
 import scala.xml.Node
+import scala.util.parsing.json._
 
 abstract class APIArgumentsBase {
-	def AddArg(name: String, value: String)
+	def AddArg(name: String, value: String, strType: String)
 	def toString : String
 }
 
@@ -23,7 +24,7 @@ object APIRouteArgumentsFactory extends APIArgumentFactory {
 	def ArgsInstance(elem: scala.xml.Node) = {
 		var result = new APIWebServiceRouteArguments 
 		val args = (elem \ "arg").map { ag =>
-			result.AddArg((ag \ "@name"). text, (ag \ "@value").text)
+			result.AddArg((ag \ "@name"). text, (ag \ "@value").text, (ag \ "@type").text)
 		}
 		result
 	}
@@ -35,7 +36,7 @@ class APIWebServiceRouteArguments extends APIArgumentsBase {
   	}
   	
   	private var args : List[APIRouteArg] = Nil
-	override def AddArg(name: String, value: String) = {
+	override def AddArg(name: String, value: String, strType: String) = {
   		args = new APIRouteArg(name, value)::args
   	}
   	
@@ -46,11 +47,57 @@ class APIWebServiceRouteArguments extends APIArgumentsBase {
   	}
 }
 
+object APIJOSNRPCArgumentsFactory extends APIArgumentFactory {
+	def ArgsInstance(elem: scala.xml.Node) = {
+		var result = new APIJOSNRPCArguments
+		val args = (elem \ "arg").map { ag =>
+			result.AddArg((ag \ "@name"). text, (ag \ "@value").text, (ag \ "@type").text)
+		}
+		result
+	}
+}
+
+class APIJOSNRPCArguments extends APIArgumentsBase {
+	var args : Map[String, Any] = Map.empty
+  
+	override def AddArg(name: String, value: String, strType: String) = {
+  		args += (name -> APIArgsTypeDelegate.ValueInstance(value, ',', strType))
+  	}
+  	
+  	override def toString = {
+  	  	new JSONObject(args).toString
+  	}
+	
+}
+
 object APIArgumentFactoryDispatch {
 	def ArgsInstance(name: String, elem: scala.xml.Node) : APIArgumentsBase = {
 		name match {
 		  case "Route" => APIRouteArgumentsFactory.ArgsInstance(elem)
+		  case "MasheryArgs" => APIJOSNRPCArgumentsFactory.ArgsInstance(elem)
 		  case _ => null
 		}
 	} 
+}
+
+object APIArgsTypeDelegate {
+	def ValueInstance(value: String, split: Char, strType: String) : Any = {
+		strType match {
+		  case "String" => value
+		  case "List" => new APIArgsTypeDelegateHelper(value.split(split).toList)
+		  case "Int" => value.toInt
+		  case _ => {
+		    println("Argument type not found")
+		    null
+		  }
+		}
+	}
+}
+
+case class APIArgsTypeDelegateHelper(ls: List[String]) {
+    override def toString = {
+      	var re = "["
+		for (item <- ls) re += "\"%s\",".format(item.toString)
+		re.subSequence(0, re.length() - 1) + "]"
+    }
 }
