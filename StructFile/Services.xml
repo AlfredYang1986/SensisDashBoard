@@ -1,17 +1,14 @@
 <Services>
-	<Service name="APIConcreteProxyDemo" url="http://api.sensis.com.au/20110229/search?" >
-		<key factory="BaseKey">
-			<arg name="key" value="vxbhkb39hsh4yyubx8yrrgj9" />
-			<urlName name="key" delegate="copy(key)" />
+	<Service name="Mashery" url="http://api.mashery.com/v2/json-rpc/246?" >
+		<key factory = "MasheryKey">
+			<arg name="key" value="x44puxsz2py5776xjvghtw3x" />
+			<arg name="secret" value="tC36gPwHaa" />
+			<urlName name="apikey" delegate="copy(key)"/>
+			<urlName name="sig" delegate="md5(key,secret,time)"/>
 		</key>
-		<query factory="Route">
-			<arg type="String" name="query" value="Pizza" />
-			<arg type="String" name="location" value="South Yarra" />
-		</query>
 		<query factory="Route">
 			<arg type="String" name="query" value="Pizza" />
 			<arg type="String" name="location" value="City" />
 		</query>
-	</Service>	
-
+	</Service>
 </Services>

@@ -30,7 +30,6 @@ object APIFactory {
 		  	// for Server
 		  	val service_name = (se \ "@name").text
 		  	val service_url = (se \ "@url").text
-//		  	val service_key = (se \ "@key").text
 		  	
 		  	// for key
 		  	var sk = (se \ "key").apply(0)

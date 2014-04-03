@@ -9,6 +9,13 @@ abstract class APIKeyBase {
 
 object BaseKey extends APIKeyBase {
 	def AppendUrlString(name: String, delegate: String, args : Map[String, String]) = {
+		if (!UrlString.isEmpty()) UrlString += "&"
+		UrlString += APIKeyDelegateDispatch.UrlKeyValue(name, delegate, args)
+	}
+}
+
+object JSONRPCKey extends APIKeyBase {
+	def AppendUrlString(name: String, delegate: String, args : Map[String, String]) = {
 		UrlString += APIKeyDelegateDispatch.UrlKeyValue(name, delegate, args)
 	}
 }
@@ -17,7 +24,7 @@ object APIServiceKeyDispatchFactory {
 	def APIKeyDispatch(name: String) : APIKeyBase = {
 		name match {
 		  case "BaseKey" => BaseKey
-//		  case "JOSN-RPC" => JSONRPCKey
+		  case "MasheryKey" => JSONRPCKey
 		  case _ => { 
 		    println("Error, generating Key") 
 		    null 

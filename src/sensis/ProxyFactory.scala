@@ -10,6 +10,7 @@ import sensis.apiclient._
 
 object ProxyFactory {
 	def getAPIProxy(name: String) : APIProxy = name match {
+	  case "Mashery" => APIConcreteProxyDemo
 	  case "APIConcreteProxyDemo" => APIConcreteProxyDemo
 	  case _ => null
 	}
