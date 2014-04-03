@@ -16,6 +16,7 @@ object BaseKey extends APIKeyBase {
 
 object JSONRPCKey extends APIKeyBase {
 	def AppendUrlString(name: String, delegate: String, args : Map[String, String]) = {
+		if (!UrlString.isEmpty()) UrlString += "&"
 		UrlString += APIKeyDelegateDispatch.UrlKeyValue(name, delegate, args)
 	}
 }

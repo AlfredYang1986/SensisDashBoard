@@ -9,7 +9,16 @@
 package sensis.apiclient
 
 import scala.xml._
+import io.Source
 
 object APIConcreteProxyDemo extends APIAbstractProxy with APIProxy {
 	def name = "Alfred Yang's Demo"
+}
+
+object MasheryProxy extends APIAbstractProxy with APIProxy {
+	def name = "Mashery Proxy"
+	override def request(url: String, key: String, args: String) : String = {
+		val query = url + key
+		Source.fromURL(query).mkString
+	}
 }

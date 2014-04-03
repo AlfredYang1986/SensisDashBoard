@@ -19,7 +19,11 @@ object APIKeyDelegateDispatch {
 				  a match {
 				    case "key" => key = args.get("key").get
 				    case "secret" => secret = args.get("secret").get
-				    case "time" => time = new java.sql.Timestamp(System.currentTimeMillis()).toGMTString()
+				    case "time" => {
+				      val date : java.util.Date = new java.util.Date();
+				      time = String.valueOf(date.getTime() / 1000)
+//				      time = String.valueOf(new java.sql.Timestamp(date.getTime()).getTime())
+				    	}
 				    case _ => {
 				      println("error argments for md5")
 				      null
