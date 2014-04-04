@@ -6,10 +6,45 @@
 			<urlName name="apikey" delegate="copy(key)" />
 			<urlName name="sig" delegate="md5(key,secret,time)"/>
 		</key>
-		<query factory="MasheryArgs">
+		<query factory="JOSN-RPC">
 			<arg type="String" name="method" value="member.fetch" />
-			<arg type="List" name="params" value="Sensis" />
+			<arg type="StringList" name="params" value="SAPI" />
+			<arg type="Int" name="id" value="1" />
+		</query>
+
+		<query factory="JOSN-RPC">
+			<arg type="String" name="method" value="application.fetch" />
+			<arg type="IntList" name="params" value="1" />
+			<arg type="Int" name="id" value="1" />
+		</query>
+
+		<query factory="JOSN-RPC">
+			<arg type="String" name="method" value="member.fetch" />
+			<arg type="StringList" name="params" value="Sensis" />
+			<arg type="Int" name="id" value="1" />
+		</query>
+
+		<query factory="JOSN-RPC">
+			<arg type="String" name="method" value="role.fetch" />
+			<arg type="IntList" name="params" value="378" />
+			<arg type="Int" name="id" value="1" />
+		</query>
+
+		<query factory="JOSN-RPC">
+			<arg type="String" name="method" value="service.fetch" />
+			<arg type="IntList" name="params" value="1001" />
 			<arg type="Int" name="id" value="1" />
 		</query>
 	</Service> 
+	
+	<Service name="APIConcreteProxyDemo" url="http://api.sensis.com.au/20110229/search?" >
+		<key factory="BaseKey">
+			<arg name="key" value="vxbhkb39hsh4yyubx8yrrgj9" />
+			<urlName name="key" delegate="copy(key)" />
+		</key>
+		<query factory="Route">
+			<arg type="String" name="query" value="Pizza" />
+			<arg type="String" name="location" value="South Yarra" />
+		</query>
+	</Service>	
 </Services>

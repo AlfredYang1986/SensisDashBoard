@@ -74,7 +74,7 @@ object APIArgumentFactoryDispatch {
 	def ArgsInstance(name: String, elem: scala.xml.Node) : APIArgumentsBase = {
 		name match {
 		  case "Route" => APIRouteArgumentsFactory.ArgsInstance(elem)
-		  case "MasheryArgs" => APIJOSNRPCArgumentsFactory.ArgsInstance(elem)
+		  case "JOSN-RPC" => APIJOSNRPCArgumentsFactory.ArgsInstance(elem)
 		  case _ => null
 		}
 	} 
@@ -84,7 +84,8 @@ object APIArgsTypeDelegate {
 	def ValueInstance(value: String, split: Char, strType: String) : Any = {
 		strType match {
 		  case "String" => value
-		  case "List" => new APIArgsTypeDelegateHelper(value.split(split).toList)
+		  case "StringList" => new APIArgsStringListHelper(value.split(split).toList)
+		  case "IntList" => new APIArgsIntListHelper(value.split(split).toList)
 		  case "Int" => value.toInt
 		  case _ => {
 		    println("Argument type not found")
@@ -94,10 +95,18 @@ object APIArgsTypeDelegate {
 	}
 }
 
-case class APIArgsTypeDelegateHelper(ls: List[String]) {
+case class APIArgsStringListHelper(ls: List[String]) {
     override def toString = {
       	var re = "["
 		for (item <- ls) re += "\"%s\",".format(item.toString)
+		re.subSequence(0, re.length() - 1) + "]"
+    }
+}
+
+case class APIArgsIntListHelper(ls: List[String]) {
+    override def toString = {
+      	var re = "["
+		for (item <- ls) re += "%s,".format(item.toString)
 		re.subSequence(0, re.length() - 1) + "]"
     }
 }
