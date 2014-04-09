@@ -5,3 +5,4 @@ bin
 backup
 data
 MongoDBTest/bin
+SplunkDemo/bin
