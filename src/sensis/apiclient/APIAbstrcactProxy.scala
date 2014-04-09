@@ -13,10 +13,12 @@ package sensis.apiclient
 import io.Source
 import java.net.URLEncoder._
 import scala.util.parsing.json._
+import sensis.APIArgumentsBase
+import sensis.APIKeyBase
 
 trait APIProxy {
-	def request(url: String, key: String, args: String) : String = {
-		val query = url + key + args
+	def request(url: String, key: APIKeyBase, args: APIArgumentsBase) : String = {
+		val query = url + key.toString + args.toString
 		Source.fromURL(query).mkString
 	}
 }

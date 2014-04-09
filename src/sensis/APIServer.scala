@@ -8,7 +8,7 @@ package sensis
 
 import sensis.apiclient.APIProxy
 
-case class APIServer(name: String, url: String, key: String) {
+case class APIServer(name: String, url: String, key: APIKeyBase) {
 	private var queries : List[APIQuery] = Nil
 	private var concrete : APIProxy = null
 	
@@ -27,11 +27,15 @@ case class APIServer(name: String, url: String, key: String) {
 		}
 		
 		def queryServer : String = {
-			if (concrete != null) concrete.request(url, key, queryArgs)
+			if (concrete != null) concrete.request(url, key, args)
 			else { 
 			  println("error, set proxy first") 
 			  null 
 			}
+		}
+		
+		override def toString = {
+	  	  	queryArgs
 		}
 	}
 }

@@ -42,7 +42,7 @@ object APIFactory {
 		  	  	keyInstance.AppendUrlString((un \ "@name").text, (un \ "@delegate").text, keyInstance.args)
 		  	  }
 		  	
-		  	var re = new APIServer(service_name, service_url, keyInstance.UrlString)
+		  	var re = new APIServer(service_name, service_url, keyInstance)
 		  	// for query
 		  	(se \ "query").map { qu =>
 		  		// for query arguments

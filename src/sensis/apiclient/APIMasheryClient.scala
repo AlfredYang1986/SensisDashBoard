@@ -5,7 +5,6 @@
  * Created by Afred yang
  * 29th March, 2014
  */
-
 package sensis.apiclient
 
 import java.net.URL
@@ -16,17 +15,14 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.io.IOException
-
 import errorreport.Error_CallApiFail
-
-object APIConcreteProxyDemo extends APIAbstractProxy with APIProxy {
-	def name = "Alfred Yang's Demo"
-}
+import sensis.APIKeyBase
+import sensis.APIArgumentsBase
 
 object MasheryProxy extends APIAbstractProxy with APIProxy {
 	def name = "Mashery Proxy"
-	override def request(url: String, key: String, args: String) : String = {
-		val query = url + key
+	override def request(url: String, key: APIKeyBase, args: APIArgumentsBase) : String = {
+		val query = url + key.UrlString
 		val mUrl : URL = new URL(query)
 		val urlConn : HttpURLConnection = mUrl.openConnection().asInstanceOf[HttpURLConnection]
 		urlConn.setRequestMethod("POST");
@@ -35,13 +31,13 @@ object MasheryProxy extends APIAbstractProxy with APIProxy {
 	
 		urlConn.addRequestProperty("Content-Type", "application/json")
 		urlConn.addRequestProperty("Accept", "text/plain")
-		urlConn.setRequestProperty("Content-Length", Integer.toString(args.length()))
+		urlConn.setRequestProperty("Content-Length", Integer.toString(args.toString().length()))
 
 		urlConn.connect();
-		
+	
 		var wr : OutputStreamWriter = new OutputStreamWriter(urlConn.getOutputStream());
-        wr.write(args);
-        wr.flush();
+        wr.write(args.toString)
+        wr.flush()
 		         
         var sb : StringBuilder = new StringBuilder();
         try {
@@ -52,7 +48,7 @@ object MasheryProxy extends APIAbstractProxy with APIProxy {
         			if (line != null) sb.append(line + '\n');
         		}
         } catch {
-          case ex : IOException => println("No return")
+          case ex : IOException => println(ex.getMessage())
           case _ : Throwable => throw Error_CallApiFail
         } 
         sb.toString
