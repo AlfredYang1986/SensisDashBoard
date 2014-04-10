@@ -21,7 +21,7 @@ object SplunkProxy extends APIProxy {
 		key match {
 		  case SplunkKey => {
 			val service : Service = Service.connect(SplunkKey.loginArgs)
-			IOUtils.toString(service.export("search earliest=\"04/04/2014:00:00:00\" latest=\"04/04/2014:00:00:59\""))
+			IOUtils.toString(service.export("search earliest=\"04/04/2014:00:00:00\" latest=\"04/04/2014:00:00:01\""))
 		  }
 		  case _ => throw Error_PhraseXML
 		}
