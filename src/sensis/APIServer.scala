@@ -7,16 +7,19 @@
 package sensis
 
 import sensis.apiclient.APIProxy
+import resultphrase.ResultHandle
 
 case class APIServer(name: String, url: String, key: APIKeyBase) {
 	private var queries : List[APIQuery] = Nil
 	private var concrete : APIProxy = null
+	private var handle : ResultHandle = null
 	
 	def queryAll: Unit = {
-	  	for(q <- queries) println(q.queryServer)
+	  	for(q <- queries) handle(q.queryServer)
 	}
 
 	def setProxy(p : APIProxy) = concrete = p
+	def setHandle(h : ResultHandle) = handle = h
 	
 	def newQuery(args: APIArgumentsBase) = queries = new APIQuery(args)::queries
 

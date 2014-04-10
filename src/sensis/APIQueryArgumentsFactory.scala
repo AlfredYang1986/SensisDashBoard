@@ -67,7 +67,24 @@ class APIJOSNRPCArguments extends APIArgumentsBase {
   	override def toString = {
   	  	new JSONObject(args).toString
   	}
-	
+}
+
+object APISplunkArgumnetsFactory extends APIArgumentFactory {
+	def ArgsInstance(elem: scala.xml.Node) = {
+		var result = new APIJOSNRPCArguments
+		val args = (elem \ "arg").map { ag =>
+			result.AddArg((ag \ "@name"). text, (ag \ "@value").text, (ag \ "@type").text)
+		}
+		result
+	}
+}
+
+class APISplunkArguments extends APIArgumentsBase {
+	var args : Map[String, Any] = Map.empty
+	override def AddArg(name: String, value: String, strType: String) = {
+  		args += (name -> APIArgsTypeDelegate.ValueInstance(value, ',', strType))
+  	}
+  	override def toString = args.toString
 }
 
 object APIArgumentFactoryDispatch {
@@ -75,6 +92,7 @@ object APIArgumentFactoryDispatch {
 		name match {
 		  case "Route" => APIRouteArgumentsFactory.ArgsInstance(elem)
 		  case "JOSN-RPC" => APIJOSNRPCArgumentsFactory.ArgsInstance(elem)
+		  case "SplunkApiQuery" => APISplunkArgumnetsFactory.ArgsInstance(elem)
 		  case _ => null
 		}
 	} 

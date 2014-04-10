@@ -18,6 +18,7 @@ import java.io.IOException
 import errorreport.Error_CallApiFail
 import sensis.APIKeyBase
 import sensis.APIArgumentsBase
+import org.apache.commons.io.IOUtils
 
 object MasheryProxy extends APIAbstractProxy with APIProxy {
 	def name = "Mashery Proxy"
@@ -39,18 +40,13 @@ object MasheryProxy extends APIAbstractProxy with APIProxy {
         wr.write(args.toString)
         wr.flush()
 		         
-        var sb : StringBuilder = new StringBuilder();
+        var re : String = ""
         try {
-        		var rd : BufferedReader = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
-        		var line : String = ""
-        		while (line != null) {
-        			line = rd.readLine()
-        			if (line != null) sb.append(line + '\n');
-        		}
+			re = IOUtils.toString(new InputStreamReader(urlConn.getInputStream()))
         } catch {
           case ex : IOException => println(ex.getMessage())
           case _ : Throwable => throw Error_CallApiFail
         } 
-        sb.toString
+        re
 	}
 }

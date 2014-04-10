@@ -13,6 +13,7 @@ object ProxyFactory {
 	  case "Mashery" => MasheryProxy
 	  case "APIConcreteProxyDemo" => APIConcreteProxyDemo
 	  case "Mashery-Sandbox" => MasheryProxy
+	  case "Splunk" => SplunkProxy
 	  case _ => null
 	}
 }

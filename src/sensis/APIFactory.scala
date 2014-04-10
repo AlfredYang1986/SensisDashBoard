@@ -30,6 +30,7 @@ object APIFactory {
 		  	// for Server
 		  	val service_name = (se \ "@name").text
 		  	val service_url = (se \ "@url").text
+		  	val handle_name = (se \ "@resultHandle").text
 		  	
 		  	// for key
 		  	var sk = (se \ "key").apply(0)
@@ -51,6 +52,7 @@ object APIFactory {
 		  		re.newQuery(args)
 		  	}
 		  	re.setProxy(ProxyFactory.getAPIProxy(re.name))
+		  	re.setHandle(ResultHandleFactory.getResultHandle(handle_name))
 		  	re
 		}
 		
