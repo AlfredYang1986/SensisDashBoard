@@ -71,7 +71,7 @@ class APIJOSNRPCArguments extends APIArgumentsBase {
 
 object APISplunkArgumnetsFactory extends APIArgumentFactory {
 	def ArgsInstance(elem: scala.xml.Node) = {
-		var result = new APIJOSNRPCArguments
+		var result = new APISplunkArguments
 		val args = (elem \ "arg").map { ag =>
 			result.AddArg((ag \ "@name"). text, (ag \ "@value").text, (ag \ "@type").text)
 		}

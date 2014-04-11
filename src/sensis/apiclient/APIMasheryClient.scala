@@ -22,7 +22,7 @@ import org.apache.commons.io.IOUtils
 
 object MasheryProxy extends APIAbstractProxy with APIProxy {
 	def name = "Mashery Proxy"
-	override def request(url: String, key: APIKeyBase, args: APIArgumentsBase) : String = {
+	override def request(url: String, key: APIKeyBase, args: APIArgumentsBase) {
 		val query = url + key.UrlString
 		val mUrl : URL = new URL(query)
 		val urlConn : HttpURLConnection = mUrl.openConnection().asInstanceOf[HttpURLConnection]
@@ -47,6 +47,6 @@ object MasheryProxy extends APIAbstractProxy with APIProxy {
           case ex : IOException => println(ex.getMessage())
           case _ : Throwable => throw Error_CallApiFail
         } 
-        re
+        callback(re)
 	}
 }

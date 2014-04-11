@@ -17,10 +17,13 @@ import sensis.APIArgumentsBase
 import sensis.APIKeyBase
 
 trait APIProxy {
-	def request(url: String, key: APIKeyBase, args: APIArgumentsBase) : String = {
+	def request(url: String, key: APIKeyBase, args: APIArgumentsBase) = {
 		val query = url + key.toString + args.toString
-		Source.fromURL(query).mkString
+		callback(Source.fromURL(query).mkString)
 	}
+	
+	var callback: (String) => Unit = null
+	def setCallBack(f: (String)=>Unit) = callback = f
 }
 
 abstract class APIAbstractProxy {

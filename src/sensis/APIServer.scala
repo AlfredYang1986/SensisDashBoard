@@ -15,7 +15,7 @@ case class APIServer(name: String, url: String, key: APIKeyBase) {
 	private var handle : ResultHandle = null
 	
 	def queryAll: Unit = {
-	  	for(q <- queries) handle(q.queryServer)
+	  	for(q <- queries) q.queryServer
 	}
 
 	def setProxy(p : APIProxy) = concrete = p
@@ -29,11 +29,13 @@ case class APIServer(name: String, url: String, key: APIKeyBase) {
 	  	  	args.toString()
 		}
 		
-		def queryServer : String = {
-			if (concrete != null) concrete.request(url, key, args)
+		def queryServer  {
+			if (concrete != null) {
+				concrete.setCallBack(handle.apply)
+				concrete.request(url, key, args)
+			}
 			else { 
 			  println("error, set proxy first") 
-			  null 
 			}
 		}
 		
