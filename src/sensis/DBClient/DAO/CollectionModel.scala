@@ -11,19 +11,21 @@ package sensis.DBClient.DAO
 
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormatter
+import scala.util.control.Exception
 
-case class DataSource(_id: Int, customId: Int, dsKey: String, dsName: String, updateDate: DateTime)
+case class DataSource(_id: String, dsKey: String, dsName: String, updateDate: DateTime)
 
-case class User(key: String, metricesMap: Map[String, Any]) {
+case class User(userKey: String, metricesMap: Map[String, Any]) {
 
-  def id: String = ""
-  def ds: DataSource = null
-  def updateDate: DateTime = DateTime.now()
- 
-  def name: String = ""
-  def email: String = ""
+  var _id: String = ""
+  var updateDate: DateTime = DateTime.now()
+  var ds: DataSource = null
 
-  //  def listingsInHeadingInState: Int = metricesMap("index/listingsInHeadingInState")
+  def setId(id: String) = _id = id
+  def setDataSource(source: DataSource) = ds = source
+
+//    def listingsInHeadingInState: Int = metricesMap.getOrElse("index/listingsInHeadingInState", 10)
+    
   //  def listingsInLetterPartition: Int = metricesMap("index/listingsInLetterPartition")
   //  def letterPartitions: Int = metricesMap("index/letterPartitions")
   //  def searchByName: Int = metricesMap("searchByName")
@@ -37,8 +39,12 @@ case class User(key: String, metricesMap: Map[String, Any]) {
   //  def search: Int = metricesMap("search")
 
   override def toString = {
-    var s: String = "key: " + key + ", updateDate:" + updateDate
+    var s: String = "key: " + userKey + ", updateDate:" + updateDate
+    for ((key, value) <- metricesMap)
+      s = s + ", " + key + ": " + value
+      
     s
   }
+  
 }
 

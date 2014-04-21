@@ -2,7 +2,7 @@ package resultphrase
 
 import scala.xml.XML._
 import sensis.DBClient.DAO.User
-import sensis.DBClient.dataHandlerFacade
+import sensis.DBClient.DataHandlerFacade
 import sensis.DBClient.DataBaseHandler
 
 object XMLResultHandle extends ResultHandle {
@@ -37,7 +37,7 @@ object XMLResultHandle extends ResultHandle {
         }
       }
     }
-    UserList.printUserList
+    UserList.saveUserList
   }
 }
 
@@ -45,14 +45,13 @@ object UserList {
 
   var s: Map[String, printUser] = Map.empty
 
-  def printUserList = {
+  def saveUserList = {
     // List to hold the User instances
     var userList: List[User] = List.empty
     // Obtaining iterator for traversing data Map
     var it = s.iterator
 
-    while (it.hasNext) {
-      
+    while (it.hasNext) {      
       val (key, value) = it.next
       // Extracting the metrics map.
       var innerMetricMap = value.callMethodMap
@@ -61,7 +60,7 @@ object UserList {
       userList = loggedUser :: userList      
     }
     // Insert data in to DB
-    val dataHandlerFacade:dataHandlerFacade =new DataBaseHandler
+    val dataHandlerFacade:DataHandlerFacade =new DataBaseHandler
     dataHandlerFacade.saveCollectionToDB(userList, "SplunkData")
   }
 }

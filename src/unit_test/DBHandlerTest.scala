@@ -1,14 +1,16 @@
 package unit_test
 
 import sensis.DBClient.DataBaseHandler
-import sensis.DBClient.dataHandlerFacade
+import sensis.DBClient.DataHandlerFacade
 
 object DBHandlerTest extends App {
 
-  val dbh: dataHandlerFacade = new DataBaseHandler
+  val dbh: DataHandlerFacade = new DataBaseHandler
+  val dbh2: DataBaseHandler = new DataBaseHandler
 
-  //dbh.saveCollectionToDB(List.empty)
+//  dbh.saveCollectionToDB(List.empty, "SplunkData")
   
-  dbh.retriveCollection("SplunkData")
+  dbh.retriveCollection("Splunk")
+//  dbh2.getDataSource("New Relic")
 
 }
