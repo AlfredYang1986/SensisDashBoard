@@ -12,7 +12,6 @@ object XMLResultHandle extends ResultHandle {
 		  	(index \ "field").map { field =>
 		  	  	val k = (field \ "@k").text
 		  	  	if (k == "_raw") {
-//		  	  		println(field.text)
 		  	  		var raw = field.text
 		  	  		raw = raw.substring(raw.indexOf('"'), raw.lastIndexOf('"'))
 		  	  		val method_name: String = RoutePhraseSplunk.phraseMethodName(raw)
