@@ -7,6 +7,9 @@ import errorreport.Error_PhraseJosn
 import sensis.DBClient.DAO.DataSource
 import sensis.DBClient.DAO.User
 import com.mongodb.casbah.commons.MongoDBObject
+import com.mongodb.casbah.commons.MongoDBObjectBuilder
+import com.mongodb.DBCollection
+import scala.util.parsing.json.JSONObject
 
 abstract class DataHandlerFacade {
 
@@ -36,7 +39,10 @@ class DataBaseHandler extends DataHandlerFacade {
           newMap += (x._1 -> x._2)
         println(x + "   " + x._1 + "   " + x._2)
       })
+//      var objBuilder = new JSONObject(loggedUser.metricesMap)
+//      objBuilder += new MongoDBObject("key" -> loggedUser.userKey, "metrics" -> newMap, "updatedDate" -> DateTime.now())
       dataCollection.insert(MongoDBObject("key" -> loggedUser.userKey, "metrics" -> newMap, "updatedDate" -> DateTime.now()))
+//      dataCollection.save(new List[User].empty, userList)
     }
   }
 
@@ -51,6 +57,8 @@ class DataBaseHandler extends DataHandlerFacade {
     }
 
     var userList: List[User] = List.empty
+    // Get the relevant DataSource object
+    val ds: DataSource = getDataSource(logSourceName)
 
     for (dataRow <- dataCollection) {
       // Parsing JSON data record
@@ -63,8 +71,14 @@ class DataBaseHandler extends DataHandlerFacade {
             // Call the relevant method according to the data source.
             case "Splunk" => {
               var newUser: User = retrieveSplunkUser(parsedValue, logSourceName)
-              if (newUser != null)
+              if (newUser != null) {
+                if (ds != null)
+                  newUser.ds = ds
+                else
+                  newUser.ds = new DataSource(null, null, null, null)
+
                 userList = newUser :: userList
+              }
             }
             case _ => userList
           }
@@ -72,6 +86,7 @@ class DataBaseHandler extends DataHandlerFacade {
         case None => throw Error_PhraseJosn
       }
     }
+    println(userList.length)
     userList
   }
 
@@ -79,10 +94,6 @@ class DataBaseHandler extends DataHandlerFacade {
 
     val uMap = parsedValue.asInstanceOf[Map[String, Any]]
     var newUser: User = new User(uMap("key").toString, uMap("metrics").asInstanceOf[Map[String, Any]])
-    newUser.ds = getDataSource(logSourceName)
-
-    if (newUser.ds == null)
-      newUser.ds = DataSource(null, null, null, null)
 
     newUser
   }
