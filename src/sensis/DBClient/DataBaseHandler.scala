@@ -1,20 +1,23 @@
 package sensis.DBClient
 
+import java.util.Date
+import java.util.GregorianCalendar
+
 import scala.util.parsing.json.JSON
+
 import org.joda.time.DateTime
+
 import com.mongodb.casbah.MongoCollection
-import errorreport.Error_PhraseJosn
+import com.mongodb.casbah.commons.MongoDBObject
+
+import sensis.DBClient.DAO.CallsPerUser
 import sensis.DBClient.DAO.DataSource
 import sensis.DBClient.DAO.User
-import com.mongodb.casbah.commons.MongoDBObject
-import com.mongodb.casbah.commons.MongoDBObjectBuilder
-import com.mongodb.DBCollection
-import scala.util.parsing.json.JSONObject
 
 abstract class DataHandlerFacade {
 
   def saveCollectionToDB(userList: List[User], dbCollectionName: String)
-  def retriveCollection(dbCollectionName: String): List[User]
+  //def retriveCollection(dbCollectionName: String): List[User]
 }
 
 class DataBaseHandler extends DataHandlerFacade {
@@ -38,7 +41,7 @@ class DataBaseHandler extends DataHandlerFacade {
         } else
           newMap += (x._1 -> x._2)
       })
-      
+
       dataCollection.insert(buildSplunkDBObj(loggedUser, newMap).asDBObject)
     }
   }
@@ -55,7 +58,8 @@ class DataBaseHandler extends DataHandlerFacade {
     insertObj
   }
 
-  def retriveCollection(logSourceName: String): List[User] = {
+  def retriveUserCalls(startDate: Date, endDate: Date, logSourceName: String): Map[String, Int] = {
+
     // Retrieving data collection from DB
     val conn = DBConnectionFactory.dbConnection()
     var dataCollection: MongoCollection = null
@@ -65,46 +69,35 @@ class DataBaseHandler extends DataHandlerFacade {
       case _ => throw new Exception
     }
 
-    var userList: List[User] = List.empty
-    // Get the relevant DataSource object
-    val ds: DataSource = getDataSource(logSourceName)
+    val daysForStart: Long = (new GregorianCalendar(startDate.getYear(), startDate.getMonth(), startDate.getDay()).getTime())
+      .getTime() / (24 * 60 * 60 * 1000)
+    val daysForEnd: Long = (new GregorianCalendar(endDate.getYear(), endDate.getMonth(), endDate.getDay()).getTime())
+      .getTime() / (24 * 60 * 60 * 1000)
 
     for (dataRow <- dataCollection) {
-      // Parsing JSON data record
-      val parsedValue = JSON.parseFull(dataRow.toString());
+      val parsedVal = JSON.parseFull(dataRow.toString())
 
-      parsedValue match {
-        // Check whether the parse value is not empty
-        case Some(parsedValue) => {
-          logSourceName match {
-            // Call the relevant method according to the data source.
-            case "Splunk" => {
-              var newUser: User = retrieveSplunkUser(parsedValue, logSourceName)
-              if (newUser != null) {
-                if (ds != null)
-                  newUser.ds = ds
-                else
-                  newUser.ds = new DataSource(null, null, null, null)
+      parsedVal match {
+        case Some(parsedVal) => {
+          var numOfCalls: Int = 0
+          var userKey: String = ""
 
-                userList = newUser :: userList
-              }
+          for ((key, value) <- parsedVal.asInstanceOf[Map[String, Any]]) {
+            key match {
+              case "key" => userKey = value.toString
+              case "_id" =>
+              case "days" =>
+              case _ => numOfCalls += (value.asInstanceOf[Double]).toInt
             }
-            case _ => userList
           }
+          CallsPerUser.ucMap += (userKey -> numOfCalls)
+          println((userKey -> numOfCalls))
         }
-        case None => throw Error_PhraseJosn
+        case None => throw new Exception
       }
     }
     
-    userList
-  }
-
-  def retrieveSplunkUser(parsedValue: Any, logSourceName: String): User = {
-
-    val uMap = parsedValue.asInstanceOf[Map[String, Any]]
-    var newUser: User = new User(0, uMap("key").toString, uMap("metrics").asInstanceOf[Map[String, Any]])
-
-    newUser
+    CallsPerUser.ucMap
   }
 
   def getDataSource(logSourceName: String): DataSource = {

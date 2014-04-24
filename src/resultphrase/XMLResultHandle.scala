@@ -54,39 +54,7 @@ object XMLResultHandle extends ResultHandle {
 		}
 		TimeUserList.printUserList
 	}
-  
-//  def apply_head(result: string) = {
-//    val s_beg: string = "<root>"
-//    val s_end: string = "</root>"
-//    var r = s_beg + result.substring(result.indexof("?>") + 2) + s_end
-//    val h: scala.xml.elem = scala.xml.xml.loadstring(r)
-//    (h \\ "result").map { index =>
-//      (index \ "field").map { field =>
-//        val k = (field \ "@k").text
-//        if (k == "_raw") {
-//          var raw = field.text
-//          raw = raw.substring(raw.indexof('"'), raw.lastindexof('"'))
-//          val method_name: string = routephrasesplunk.phrasemethodname(raw)
-//          val temp: map[string, string] = routephrasesplunk.phrasearguments(raw)
-//
-//          var user_key = ""
-//          temp.get("key") match {
-//            case some(e) => user_key = temp.get("key").get
-//            case none => user_key = "unknown_user"
-//          }
-//
-//          if (userlist.s.contains(user_key))
-//            userlist.s.get(user_key).get.addmethodtimes(method_name)
-//          else {
-//            val p = new printuser(user_key)
-//            p.addmethodtimes(method_name)
-//            userlist.s += (user_key -> p)
-//          }
-//        }
-//      }
-//    }
-//    userlist.saveuserlist
-//  }
+
 }
 
 object TimeUserList {
@@ -97,8 +65,7 @@ object TimeUserList {
 
     while (it.hasNext) {
       val (key, value) = it.next
-
-      //      println("time: " + key)
+      
       value.saveUserList(key)
     }
   }

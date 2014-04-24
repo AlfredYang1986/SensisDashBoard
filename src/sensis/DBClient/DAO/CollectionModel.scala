@@ -31,6 +31,10 @@ case class User(days: Long, userKey: String, metricesMap: Map[String, Any]) {
 
     s
   }
-
 }
+
+object CallsPerUser {
+    var days: Long = 0
+    var ucMap: Map[String, Int] = Map.empty
+  }
 
