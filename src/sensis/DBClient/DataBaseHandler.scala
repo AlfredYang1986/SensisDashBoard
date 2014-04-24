@@ -37,13 +37,22 @@ class DataBaseHandler extends DataHandlerFacade {
           newMap += (x._1.replace(".", "_") -> x._2)
         } else
           newMap += (x._1 -> x._2)
-        println(x + "   " + x._1 + "   " + x._2)
       })
-//      var objBuilder = new JSONObject(loggedUser.metricesMap)
-//      objBuilder += new MongoDBObject("key" -> loggedUser.userKey, "metrics" -> newMap, "updatedDate" -> DateTime.now())
-      dataCollection.insert(MongoDBObject("key" -> loggedUser.userKey, "metrics" -> newMap, "updatedDate" -> DateTime.now()))
-//      dataCollection.save(new List[User].empty, userList)
+      
+      dataCollection.insert(buildSplunkDBObj(loggedUser, newMap).asDBObject)
     }
+  }
+
+  def buildSplunkDBObj(loggedUser: User, newMap: Map[String, Any]): MongoDBObject = {
+
+    var insertObj: MongoDBObject = new MongoDBObject()
+
+    insertObj += ("days" -> (loggedUser.days).asInstanceOf[Object])
+    insertObj += ("key" -> loggedUser.userKey)
+    for ((key, value) <- newMap)
+      insertObj += (key -> (value).asInstanceOf[Object])
+
+    insertObj
   }
 
   def retriveCollection(logSourceName: String): List[User] = {
@@ -93,7 +102,7 @@ class DataBaseHandler extends DataHandlerFacade {
   def retrieveSplunkUser(parsedValue: Any, logSourceName: String): User = {
 
     val uMap = parsedValue.asInstanceOf[Map[String, Any]]
-    var newUser: User = new User(uMap("key").toString, uMap("metrics").asInstanceOf[Map[String, Any]])
+    var newUser: User = new User(0, uMap("key").toString, uMap("metrics").asInstanceOf[Map[String, Any]])
 
     newUser
   }
