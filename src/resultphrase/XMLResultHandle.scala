@@ -11,49 +11,82 @@ import java.util.GregorianCalendar
 object XMLResultHandle extends ResultHandle {
 
   def apply(result: String) = {
-    val s_beg: String = "<root>"
-    val s_end: String = "</root>"
-    var r = s_beg + result.substring(result.indexOf("?>") + 2) + s_end
-    val h: scala.xml.Elem = scala.xml.XML.loadString(r)
-    (h \\ "result").map { index =>
-      (index \ "field").map { field =>
-        val k = (field \ "@k").text
-        if (k == "_raw") {
-          var raw = field.text
+		val s_beg : String = "<root>"
+		val s_end : String = "</root>"
+		var r = s_beg + result.substring(result.indexOf("?>") + 2) + s_end
+		val h: scala.xml.Elem = scala.xml.XML.loadString(r)
+		(h \\ "result").map { index =>
+		  	(index \ "field").map { field =>
+		  	  	val k = (field \ "@k").text
+		  	  	if (k == "_raw") {
+		  	  		var raw = field.text
 
-          var str_date: String = raw.substring(raw.indexOf('[') + 1, raw.indexOf(']'))
-          str_date = str_date.substring(0, str_date.indexOf(' '))
-          val query_date: java.util.Date = new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss").parse(str_date)          
-          val days = new GregorianCalendar(query_date.getYear(), query_date.getMonth(), query_date.getDay())
-            .getTime().getTime() / (24 * 60 * 60 * 1000)
+		  	  		var str_date : String = raw.substring(raw.indexOf('[') + 1, raw.indexOf(']'))
+		  	  		str_date = str_date.substring(0, str_date.indexOf(' '))
+		  	  		val query_date : java.util.Date = new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss").parse(str_date)
+		  	  		val days = new GregorianCalendar(query_date.getYear(),query_date.getMonth(),query_date.getDay())
+		  	  						.getTime().getTime() / (24*60*60*1000)
 
-          var ul: UserList = null
-          if (TimeUserList.tu.contains(days)) ul = TimeUserList.tu.get(days).get
-          else ul = new UserList
+		  	  		var ul : UserList = null
+		  	  		if (TimeUserList.tu.contains(days))  ul = TimeUserList.tu.get(days).get
+		  	  		else ul = new UserList
+		  	  		
+		  	  		raw = raw.substring(raw.indexOf('"'), raw.lastIndexOf('"'))
+		  	  		val method_name: String = RoutePhraseSplunk.phraseMethodName(raw)
+		  	  		val temp: Map[String, String] = RoutePhraseSplunk.phraseArguments(raw)
+		  	  	
+		  	  		var user_key = ""
+		  	  		temp.get("key") match{
+		  	  		  case Some(e) => user_key = temp.get("key").get
+		  	  		  case none => user_key = "Unknown_User"
+		  	  		}
+		  	  		
+		  	  		if (ul.s.contains(user_key)) ul.s.get(user_key).get.addMethodTimes(method_name)
+		  	  		else {
+		  	  			val p = new printUser(user_key)
+		  	  			p.addMethodTimes(method_name)
+		  	  			ul.s += (user_key -> p)
+		  	  		}
 
-          raw = raw.substring(raw.indexOf('"'), raw.lastIndexOf('"'))
-          val method_name: String = RoutePhraseSplunk.phraseMethodName(raw)
-          val temp: Map[String, String] = RoutePhraseSplunk.phraseArguments(raw)
-
-          var user_key = ""
-          temp.get("key") match {
-            case Some(e) => user_key = temp.get("key").get
-            case none => user_key = "Unknown_User"
-          }
-
-          if (ul.s.contains(user_key)) ul.s.get(user_key).get.addMethodTimes(method_name)
-          else {
-            val p = new printUser(user_key)
-            p.addMethodTimes(method_name)
-            ul.s += (user_key -> p)
-          }
-
-          TimeUserList.tu += (days -> ul)
-        }
-      }
-    }
-    TimeUserList.printUserList
-  }
+		  	  		TimeUserList.tu += (days -> ul)
+		  	  	}
+		  	}
+		}
+		TimeUserList.printUserList
+	}
+  
+//  def apply_head(result: string) = {
+//    val s_beg: string = "<root>"
+//    val s_end: string = "</root>"
+//    var r = s_beg + result.substring(result.indexof("?>") + 2) + s_end
+//    val h: scala.xml.elem = scala.xml.xml.loadstring(r)
+//    (h \\ "result").map { index =>
+//      (index \ "field").map { field =>
+//        val k = (field \ "@k").text
+//        if (k == "_raw") {
+//          var raw = field.text
+//          raw = raw.substring(raw.indexof('"'), raw.lastindexof('"'))
+//          val method_name: string = routephrasesplunk.phrasemethodname(raw)
+//          val temp: map[string, string] = routephrasesplunk.phrasearguments(raw)
+//
+//          var user_key = ""
+//          temp.get("key") match {
+//            case some(e) => user_key = temp.get("key").get
+//            case none => user_key = "unknown_user"
+//          }
+//
+//          if (userlist.s.contains(user_key))
+//            userlist.s.get(user_key).get.addmethodtimes(method_name)
+//          else {
+//            val p = new printuser(user_key)
+//            p.addmethodtimes(method_name)
+//            userlist.s += (user_key -> p)
+//          }
+//        }
+//      }
+//    }
+//    userlist.saveuserlist
+//  }
 }
 
 object TimeUserList {
