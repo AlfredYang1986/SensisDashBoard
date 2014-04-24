@@ -7,6 +7,9 @@ import errorreport.Error_PhraseJosn
 import sensis.DBClient.DAO.DataSource
 import sensis.DBClient.DAO.User
 import com.mongodb.casbah.commons.MongoDBObject
+import com.mongodb.casbah.commons.MongoDBObjectBuilder
+import com.mongodb.DBCollection
+import scala.util.parsing.json.JSONObject
 
 abstract class DataHandlerFacade {
 
@@ -34,10 +37,22 @@ class DataBaseHandler extends DataHandlerFacade {
           newMap += (x._1.replace(".", "_") -> x._2)
         } else
           newMap += (x._1 -> x._2)
-        println(x + "   " + x._1 + "   " + x._2)
       })
-      dataCollection.insert(MongoDBObject("key" -> loggedUser.userKey, "metrics" -> newMap, "updatedDate" -> DateTime.now()))
+      
+      dataCollection.insert(buildSplunkDBObj(loggedUser, newMap).asDBObject)
     }
+  }
+
+  def buildSplunkDBObj(loggedUser: User, newMap: Map[String, Any]): MongoDBObject = {
+
+    var insertObj: MongoDBObject = new MongoDBObject()
+
+    insertObj += ("days" -> (loggedUser.days).asInstanceOf[Object])
+    insertObj += ("key" -> loggedUser.userKey)
+    for ((key, value) <- newMap)
+      insertObj += (key -> (value).asInstanceOf[Object])
+
+    insertObj
   }
 
   def retriveCollection(logSourceName: String): List[User] = {
@@ -46,11 +61,13 @@ class DataBaseHandler extends DataHandlerFacade {
     var dataCollection: MongoCollection = null
     // Specifying the collection according to the log source required.
     logSourceName match {
-      case "Splunk" => dataCollection = conn("SensisSAPIdb")("SplunkData")
+      case "Splunk" => dataCollection = conn("SensisSAPIdb")("splunkdata")
       case _ => throw new Exception
     }
 
     var userList: List[User] = List.empty
+    // Get the relevant DataSource object
+    val ds: DataSource = getDataSource(logSourceName)
 
     for (dataRow <- dataCollection) {
       // Parsing JSON data record
@@ -63,8 +80,14 @@ class DataBaseHandler extends DataHandlerFacade {
             // Call the relevant method according to the data source.
             case "Splunk" => {
               var newUser: User = retrieveSplunkUser(parsedValue, logSourceName)
-              if (newUser != null)
+              if (newUser != null) {
+                if (ds != null)
+                  newUser.ds = ds
+                else
+                  newUser.ds = new DataSource(null, null, null, null)
+
                 userList = newUser :: userList
+              }
             }
             case _ => userList
           }
@@ -72,17 +95,14 @@ class DataBaseHandler extends DataHandlerFacade {
         case None => throw Error_PhraseJosn
       }
     }
+    
     userList
   }
 
   def retrieveSplunkUser(parsedValue: Any, logSourceName: String): User = {
 
     val uMap = parsedValue.asInstanceOf[Map[String, Any]]
-    var newUser: User = new User(uMap("key").toString, uMap("metrics").asInstanceOf[Map[String, Any]])
-    newUser.ds = getDataSource(logSourceName)
-
-    if (newUser.ds == null)
-      newUser.ds = DataSource(null, null, null, null)
+    var newUser: User = new User(0, uMap("key").toString, uMap("metrics").asInstanceOf[Map[String, Any]])
 
     newUser
   }

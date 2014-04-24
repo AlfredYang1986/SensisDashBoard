@@ -9,7 +9,7 @@ import java.util.Calendar
 import java.util.GregorianCalendar
 
 object XMLResultHandle extends ResultHandle {
-	
+
   def apply(result: String) = {
 		val s_beg : String = "<root>"
 		val s_end : String = "</root>"
@@ -55,97 +55,103 @@ object XMLResultHandle extends ResultHandle {
 		TimeUserList.printUserList
 	}
   
-//  def apply_head(result: String) = {
-//    val s_beg: String = "<root>"
-//    val s_end: String = "</root>"
-//    var r = s_beg + result.substring(result.indexOf("?>") + 2) + s_end
-//    val h: scala.xml.Elem = scala.xml.XML.loadString(r)
+//  def apply_head(result: string) = {
+//    val s_beg: string = "<root>"
+//    val s_end: string = "</root>"
+//    var r = s_beg + result.substring(result.indexof("?>") + 2) + s_end
+//    val h: scala.xml.elem = scala.xml.xml.loadstring(r)
 //    (h \\ "result").map { index =>
 //      (index \ "field").map { field =>
 //        val k = (field \ "@k").text
 //        if (k == "_raw") {
 //          var raw = field.text
-//          raw = raw.substring(raw.indexOf('"'), raw.lastIndexOf('"'))
-//          val method_name: String = RoutePhraseSplunk.phraseMethodName(raw)
-//          val temp: Map[String, String] = RoutePhraseSplunk.phraseArguments(raw)
+//          raw = raw.substring(raw.indexof('"'), raw.lastindexof('"'))
+//          val method_name: string = routephrasesplunk.phrasemethodname(raw)
+//          val temp: map[string, string] = routephrasesplunk.phrasearguments(raw)
 //
 //          var user_key = ""
 //          temp.get("key") match {
-//            case Some(e) => user_key = temp.get("key").get
-//            case none => user_key = "Unknown_User"
+//            case some(e) => user_key = temp.get("key").get
+//            case none => user_key = "unknown_user"
 //          }
 //
-//          if (UserList.s.contains(user_key))
-//            UserList.s.get(user_key).get.addMethodTimes(method_name)
+//          if (userlist.s.contains(user_key))
+//            userlist.s.get(user_key).get.addmethodtimes(method_name)
 //          else {
-//            val p = new printUser(user_key)
-//            p.addMethodTimes(method_name)
-//            UserList.s += (user_key -> p)
+//            val p = new printuser(user_key)
+//            p.addmethodtimes(method_name)
+//            userlist.s += (user_key -> p)
 //          }
 //        }
 //      }
 //    }
-//    UserList.saveUserList
+//    userlist.saveuserlist
 //  }
 }
 
 object TimeUserList {
-	var tu : Map[Long, UserList] = Map.empty
-	
-	def printUserList = {
-		var it = tu.iterator
-		while (it.hasNext) {
-			val (key, value) = it.next
-			println("time: " + key)
-			value.printUserList
-		}
-	}
+  var tu: Map[Long, UserList] = Map.empty
+
+  def printUserList = {
+    var it = tu.iterator
+
+    while (it.hasNext) {
+      val (key, value) = it.next
+
+      //      println("time: " + key)
+      value.saveUserList(key)
+    }
+  }
 }
 
 class UserList {
 
   var s: Map[String, printUser] = Map.empty
 
-  	def printUserList = {
-		var it = s.iterator
-		while (it.hasNext) {
-			val (key, value) = it.next
-			println("User Key: " + key)
-			var it_in = value.callMethodMap.iterator
-			while (it_in.hasNext) {
-				val (me, times) = it_in.next
-				println("    " + me + ": " + times.toString)
-			}
-		}
-	}
-  
-  def saveUserList = {
+  //  def printUserList = {
+  //    var it = s.iterator
+  //    while (it.hasNext) {
+  //      val (key, value) = it.next
+  //      println("User Key: " + key)
+  //      var it_in = value.callMethodMap.iterator
+  //      while (it_in.hasNext) {
+  //        val (me, times) = it_in.next
+  //        println("    " + me + ": " + times.toString)
+  //      }
+  //    }
+  //  }
+
+  def saveUserList(days: Long) = {
     // List to hold the User instances
     var userList: List[User] = List.empty
     // Obtaining iterator for traversing data Map
     var it = s.iterator
 
-    while (it.hasNext) {      
+    while (it.hasNext) {
       val (key, value) = it.next
       // Extracting the metrics map.
       var innerMetricMap = value.callMethodMap
       // Creating new user object of each user data collection.
-      var loggedUser: User = User(key, innerMetricMap)
-      userList = loggedUser :: userList      
+      var loggedUser: User = User(days, key, innerMetricMap)
+      userList = loggedUser :: userList
     }
+    
     // Insert data in to DB
-    val dataHandlerFacade:DataHandlerFacade =new DataBaseHandler
-    dataHandlerFacade.saveCollectionToDB(userList, "SplunkData")
+    val dataHandlerFacade: DataHandlerFacade = new DataBaseHandler
+    dataHandlerFacade.saveCollectionToDB(userList, "splunkdata")
   }
 }
 
 case class printUser(key: String) {
   var callMethodMap: Map[String, Int] = Map.empty // Alfred Demo (MethodName -> Times)
+
   def addMethodTimes(name: String) = {
+
     if (callMethodMap.contains(name)) {
       val i = 1 + callMethodMap.get(name).get
-//      callMethodMap -= name
+      //      callMethodMap -= name
       callMethodMap += (name -> i)
-    } else callMethodMap += (name -> 1)
+    } else
+      callMethodMap += (name -> 1)
   }
 }
