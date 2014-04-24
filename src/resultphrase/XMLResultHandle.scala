@@ -20,7 +20,7 @@ object XMLResultHandle extends ResultHandle {
 		  	  	val k = (field \ "@k").text
 		  	  	if (k == "_raw") {
 		  	  		var raw = field.text
-		  	  		
+
 		  	  		var str_date : String = raw.substring(raw.indexOf('[') + 1, raw.indexOf(']'))
 		  	  		str_date = str_date.substring(0, str_date.indexOf(' '))
 		  	  		val query_date : java.util.Date = new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss").parse(str_date)
