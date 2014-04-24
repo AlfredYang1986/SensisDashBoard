@@ -105,7 +105,7 @@ class UserList {
     
     // Insert data in to DB
     val dataHandlerFacade: DataHandlerFacade = new DataBaseHandler
-    dataHandlerFacade.saveCollectionToDB(userList, "splunkdatainfo")
+    dataHandlerFacade.saveCollectionToDB(userList, "splunkdata")
   }
 }
 

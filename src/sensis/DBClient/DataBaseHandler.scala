@@ -61,7 +61,7 @@ class DataBaseHandler extends DataHandlerFacade {
     var dataCollection: MongoCollection = null
     // Specifying the collection according to the log source required.
     logSourceName match {
-      case "Splunk" => dataCollection = conn("SensisSAPIdb")("SplunkData")
+      case "Splunk" => dataCollection = conn("SensisSAPIdb")("splunkdata")
       case _ => throw new Exception
     }
 
@@ -95,7 +95,7 @@ class DataBaseHandler extends DataHandlerFacade {
         case None => throw Error_PhraseJosn
       }
     }
-    println(userList.length)
+    
     userList
   }
 
