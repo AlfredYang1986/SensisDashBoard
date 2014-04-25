@@ -1,9 +1,17 @@
 package query
 
-trait IQueryable
+import com.mongodb.casbah.Imports._
+
+trait IQueryable {
+	def conn_name : String = "Alfred_Test"
+	var coll_name : String = null
+
+	private def openConnection : MongoCollection = MongoConnection()(conn_name)(coll_name)
+	private def closeConnection = null
+}
 
 class ALINQ[T] {
-	var w : (T) => Boolean = null
+	var w : (T) => Boolean = x => true
 	var ls : List[T] = Nil
   
 	def in(l: List[T]) : ALINQ[T] = {
@@ -16,17 +24,45 @@ class ALINQ[T] {
 		this
 	}
 	
-	def select() : List[T] = {
+	def select[U](cr: (T) => U) : List[U] = {
 		for {
 			i <- ls
 			if (w(i))
-		} yield i
+		} yield cr(i)
 	}
 }
 
 object from {
-	def apply[T]() : ALINQ[T] = {
-		var r = new ALINQ[T]
-		return r
+	def apply[T]() : ALINQ[T] = new ALINQ[T]
+	def db() : AMongoDBLINQ = new AMongoDBLINQ
+}
+
+class AMongoDBLINQ extends IQueryable {
+	var w : DBObject = null
+  
+	def in(l: String) : AMongoDBLINQ = {
+		coll_name = l
+		this
+	}
+
+	def where(args: (String, Object)* ) : AMongoDBLINQ = {
+		w = new MongoDBObject
+		for (arg <- args) w += arg
+		this
+	}
+	
+	def select[U](cr: (MongoDBObject) => U) : List[U] = {
+	 
+		// Connecting to MongoDB
+		val mongoConn = MongoConnection()
+		// get DB
+		val mongoDB = mongoConn(conn_name)
+		// get DB collection or table
+		val mongoColl = mongoDB(coll_name)
+		
+		val ct = mongoColl.find(w).toList
+		for {
+			i <- ct
+		} yield cr(i)
 	}
 }
