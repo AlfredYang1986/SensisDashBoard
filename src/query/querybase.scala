@@ -1,6 +1,7 @@
 package query
 
 import com.mongodb.casbah.Imports._
+import com.mongodb.casbah.query.dsl.QueryExpressionObject
 
 trait IQueryable {
 	def conn_name : String = "Alfred_Test"
@@ -45,9 +46,14 @@ class AMongoDBLINQ extends IQueryable {
 		this
 	}
 
-	def where(args: (String, Object)* ) : AMongoDBLINQ = {
-		w = new MongoDBObject
-		for (arg <- args) w += arg
+	def where(args: Any* ) : AMongoDBLINQ = {
+		val w = new MongoDBObject
+		for (arg <- args) {
+			arg match {
+			  case a: (String, AnyRef) => w += a
+			  case a: DBObject => w ++ a
+			}
+		}
 		this
 	}
 	

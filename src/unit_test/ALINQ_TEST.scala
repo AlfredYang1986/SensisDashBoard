@@ -1,6 +1,7 @@
 package unit_test
 
 import query._
+import com.mongodb.casbah.Imports._
 
 object alfred_linq_test extends App {
 	var ls: List[Int] = List(1, 2, 3, 4, 5, 6)
@@ -31,4 +32,12 @@ object alfred_linq_test extends App {
 			 }
 
 	println(q1)
+
+	var q2 = from db() in "Alfred" where ("x" -> 5.asInstanceOf[Object], ("y" $lt 50) ) select 
+			 { 
+				x => 
+				  new QueryTestDome(x.as[String]("foo"), x.as[Int]("x"), x.as[Double]("y"))
+			 }
+
+	println(q2)
 }
