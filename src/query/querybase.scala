@@ -1,8 +1,3 @@
-/**
- * For Database query
- * Created By Alfred Yang
- */
-
 package query
 
 import com.mongodb.casbah.Imports._
