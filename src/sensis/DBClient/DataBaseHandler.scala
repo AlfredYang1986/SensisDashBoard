@@ -7,6 +7,8 @@ import org.jacoco.core.internal.data.CompactDataInput
 import javax.annotation.Generated
 import com.mongodb.casbah.commons.MongoDBObject
 import errorreport.Error_PhraseJosn
+import scala.collection.mutable.ArrayBuffer
+
 
 abstract class dataHandlerFacade {
 
@@ -27,7 +29,17 @@ class DataBaseHandler extends dataHandlerFacade {
 
       val loggedUser: User = iterator.next
       // Inserting data to DB collection
-      dataCollection.insert(MongoDBObject("key" -> loggedUser.key, "metrics" -> loggedUser.metricesMap))
+     val shit =new ArrayBuffer[String]()
+     
+   val cao:String=loggedUser.metricesMap.keySet.toString.replace(".", "_")
+   val strarray:Array[String] = cao.split(",");
+   val caodan:String=loggedUser.metricesMap.values.toString
+   val strarray2 = caodan.split(",");
+   
+
+   //+ loggedUser.metricesMap.values
+        
+      dataCollection.insert(MongoDBObject("key" -> loggedUser.key, "metrice" ->map ))
     }
   }
 
