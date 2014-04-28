@@ -46,13 +46,20 @@ case class SplunkDataDAO(UserKey: String, days: Long,
   getByListingId: Int,
   search: Int,
   serviceArea: Int,
-  listingsInheadingInlocality: Int,
-  signleSearch: Int,
+  listingsInHeadingInLocality: Int,
+  singleSearch: Int,
   appearance: Int,
   viewDetails: Int,
   topCategoriesInLocality: Int,
   categoriesInlocality: Int,
-  localitiesInState: Int)
+  localitiesInState: Int) {
+
+  def getTotalFuncCalls: Int = {
+    (getByListingId + search + serviceArea + 
+        listingsInHeadingInLocality + singleSearch + appearance + viewDetails + 
+        topCategoriesInLocality + categoriesInlocality + localitiesInState)
+  }
+}
 
 // Test Object to retrieve total calls per user.
 object CallsPerUser {
