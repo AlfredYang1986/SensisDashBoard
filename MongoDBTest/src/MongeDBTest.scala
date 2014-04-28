@@ -6,9 +6,9 @@ object mongodbTest extends App {
 	// Connecting to MongoDB
 	val mongoConn = MongoConnection()
 	// get DB
-	val mongoColl = mongoConn("Alfred_Test")("Alfred")
+	val mongoDB = mongoConn("Alfred_Test")
 	// get DB collection or table
-	
+	val mongoColl = mongoDB("Alfred")
 			
 	var new_obj : DBObject = MongoDBObject("foo" -> "bar", "x" -> 5, "y" -> 238.1)
 	// add to table

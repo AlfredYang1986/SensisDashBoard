@@ -2,7 +2,7 @@
 	<Service name="Splunk" url="http://localhost:8089" resultHandle="SplunkXML" >
 		<key factory="SplunkKey">
 			<arg name="username" value="admin" />
-			<arg name="password" value="Abcde196125" />
+			<arg name="password" value="123456" />
 			<arg name="host" value="localhost" />
 			<arg name="port" value="8089" />
 		</key>
