@@ -2,17 +2,18 @@ package sensis.DBClient
 
 import java.util.Date
 import java.util.GregorianCalendar
-
 import scala.util.parsing.json.JSON
-
 import org.joda.time.DateTime
-
+import com.mongodb.casbah.Imports.IntDoNOk
+import com.mongodb.casbah.Imports.mongoQueryStatements
 import com.mongodb.casbah.MongoCollection
 import com.mongodb.casbah.commons.MongoDBObject
-
+import query.from
 import sensis.DBClient.DAO.CallsPerUser
 import sensis.DBClient.DAO.DataSource
+import sensis.DBClient.DAO.SplunkDataDAO
 import sensis.DBClient.DAO.User
+import java.text.SimpleDateFormat
 
 abstract class DataHandlerFacade {
 
@@ -96,7 +97,7 @@ class DataBaseHandler extends DataHandlerFacade {
         case None => throw new Exception
       }
     }
-    
+
     CallsPerUser.ucMap
   }
 
@@ -123,5 +124,31 @@ class DataBaseHandler extends DataHandlerFacade {
       }
     }
     ds
+  }
+
+  def getTopTenUsers(startDate: String, endDate: String, logSourceName: String):List[SplunkDataDAO] ={
+
+    val sd: Date = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse(startDate)
+    val start: Long = (new GregorianCalendar(sd.getYear(), sd.getMonth(), sd.getDay()).getTime()).getTime() / (24 * 60 * 60 * 1000)
+    val ed: Date = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse(endDate)
+    val end: Long = (new GregorianCalendar(ed.getYear(), ed.getMonth(), ed.getDay()).getTime()).getTime() / (24 * 60 * 60 * 1000)
+
+    var numOfCalls = from db () in "splunkdata" where ("days" $gte start.asInstanceOf[Int], "days" $lte end.asInstanceOf[Int]) select
+      {
+        x =>
+          new SplunkDataDAO(x.as[String]("key"), x.as[Long]("days"),
+            x.getAsOrElse("getByListingId", 0),
+            x.getAsOrElse("search", 0),
+            x.getAsOrElse("serviceArea", 0),
+            x.getAsOrElse("index/listingsInHeadingInLocality", 0),
+            x.getAsOrElse("singleSearch", 0),
+            x.getAsOrElse("report/appearance", 0),
+            x.getAsOrElse("report/viewDetails", 0),
+            x.getAsOrElse("index/topCategoriesInLocality", 0),
+            x.getAsOrElse("index/topCategoriesInLocality", 0),
+            x.getAsOrElse("index/localitiesInState", 0))
+      }
+
+    numOfCalls
   }
 }

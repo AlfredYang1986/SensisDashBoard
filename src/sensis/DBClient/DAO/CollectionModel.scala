@@ -13,8 +13,14 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormatter
 import scala.util.control.Exception
 
+/**
+ * This class holds information about each DataSource.
+ */
 case class DataSource(_id: String, dsKey: String, dsName: String, updateDate: DateTime)
 
+/**
+ * Model class that holds data, which is to be inserted into database.
+ */
 case class User(days: Long, userKey: String, metricesMap: Map[String, Any]) {
 
   var _id: String = ""
@@ -33,8 +39,23 @@ case class User(days: Long, userKey: String, metricesMap: Map[String, Any]) {
   }
 }
 
-object CallsPerUser {
-    var days: Long = 0
-    var ucMap: Map[String, Int] = Map.empty
-  }
+/**
+ * Model class to hold retrieved data from database.
+ */
+case class SplunkDataDAO(UserKey: String, days: Long,
+  getByListingId: Int,
+  search: Int,
+  serviceArea: Int,
+  listingsInheadingInlocality: Int,
+  signleSearch: Int,
+  appearance: Int,
+  viewDetails: Int,
+  topCategoriesInLocality: Int,
+  categoriesInlocality: Int,
+  localitiesInState: Int)
 
+// Test Object to retrieve total calls per user.
+object CallsPerUser {
+  var days: Long = 0
+  var ucMap: Map[String, Int] = Map.empty
+}
