@@ -47,7 +47,7 @@ class AMongoDBLINQ extends IQueryable {
 	}
 
 	def where(args: Any* ) : AMongoDBLINQ = {
-		val w = new MongoDBObject
+		w = new MongoDBObject
 		for (arg <- args) {
 			arg match {
 			  case a: (String, AnyRef) => w += a
