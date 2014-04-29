@@ -13,7 +13,7 @@ object _data_connection {
 }
 
 trait IDatabaseContext {
-	def conn_name : String = "Alfred_Test"
+	def conn_name : String = "SensisSAPIdb"
 	var coll_name : String = null
 
 	protected def openConnection : MongoCollection = _data_connection._conn(conn_name)(coll_name)

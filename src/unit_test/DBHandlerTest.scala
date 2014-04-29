@@ -25,7 +25,15 @@ object DBHandlerTest extends App {
   println(d)
   println((c.getTime().getTime())/(24*60*60*1000))
   
-  dbh2.getTopTenUsers("2014/04/01 02:00:00", "2014/04/01 04:00:00", "Splunk")
+//  dbh2.getTopTenUsers("2014/04/01 02:00:00", "2014/04/01 04:00:00", "Splunk")
+  
+//  dbh2.getFunctionUsage("2014/04/01 02:00:00", "2014/04/01 04:00:00", "Splunk")
+  
+  //dbh2.getEachUserByKey("2014/04/01 02:00:00", "2014/04/01 04:00:00", "Splunk", "71da34f94aaae4d4d4d7b9d930b275d2")
+  
+//  dbh2.getDistinctUsers("2014/04/01 02:00:00", "2014/04/01 04:00:00", "Splunk")
+//  dbh2.getEachUserByKey("2014/04/01 02:00:00", "2014/04/01 04:00:00", "Splunk", "71da34f94aaae4d4d4d7b9d930b275d2")
+  dbh2.getAllDistinctUserKeys("2014/04/01 02:00:00", "2014/04/01 04:00:00", "Splunk")
 
   //  var lst: List[Int] = List.empty
   //  lst = 1 :: lst
