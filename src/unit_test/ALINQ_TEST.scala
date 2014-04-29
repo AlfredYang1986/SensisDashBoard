@@ -4,10 +4,10 @@ import query._
 import com.mongodb.casbah.Imports._
 
 object alfred_linq_test extends App {
-	var ls: List[Int] = List(1, 2, 3, 4, 5, 6)
+	var ls: List[Int] = List(6, 5, 4, 3, 2, 1)
 	
 	var query = from[Int] in 
-				ls where (x => x % 2 ==0) select 
+				ls where (x => x % 2 ==0) select
 				{
 	  				x => 
 	  				  var y = new String()
@@ -16,6 +16,8 @@ object alfred_linq_test extends App {
 				}
 	
 	println(query)
+	println(query.orderby(x => x))
+	println(query.orderby(x => x).top(2))
 	
 	var q = from db() in "Alfred" where ("x" -> 5.asInstanceOf[Object]) select 
 			{ 
@@ -24,6 +26,8 @@ object alfred_linq_test extends App {
 			}
 
 	println(q)
+	println(q.orderby(x => x.y))
+	println(q.orderby(x => x.y).top(2))
 
 	var q1 = from db() in "Alfred" where ("x" -> 5.asInstanceOf[Object], "foo" -> "bar") select 
 			 { 
@@ -32,6 +36,8 @@ object alfred_linq_test extends App {
 			 }
 
 	println(q1)
+	println(q1.orderby(x => x.y))
+	println(q1.orderby(x => x.y).top(2))
 
 	var q2 = from db() in "Alfred" where ("x" -> 5.asInstanceOf[Object], ("y" $lt 50) ) select 
 			 { 
@@ -40,4 +46,6 @@ object alfred_linq_test extends App {
 			 }
 
 	println(q2)
+	println(q2.orderby(x => x.y))
+	println(q2.orderby(x => x.y).top(2))
 }

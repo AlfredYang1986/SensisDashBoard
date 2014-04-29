@@ -34,11 +34,12 @@ class ALINQ[T] {
 		this
 	}
 	
-	def select[U](cr: (T) => U) : List[U] = {
-		for {
-			i <- ls
-			if (w(i))
-		} yield cr(i)
+	def select[U](cr: (T) => U) : IQueryable[U] = {
+		var nc = new Linq_List[U]
+		for (i <- ls) {
+			if (w(i)) nc = (nc :+ cr(i)).asInstanceOf[Linq_List[U]]
+		}
+		nc
 	}
 }
 
@@ -66,12 +67,15 @@ class AMongoDBLINQ extends IDatabaseContext {
 		this
 	}
 	
-	def select[U](cr: (MongoDBObject) => U) : List[U] = {
+//	def select[U](cr: (MongoDBObject) => U) : List[U] = {
+	def select[U](cr: (MongoDBObject) => U) : IQueryable[U] = {
 	 
 		val mongoColl = openConnection
 		val ct = mongoColl.find(w).toList
-		for {
-			i <- ct
-		} yield cr(i)
+		var nc = new Linq_List[U]
+		for (i <- ct) {
+			nc = (nc :+ cr(i)).asInstanceOf[Linq_List[U]]
+		}
+		nc
 	}
 }
