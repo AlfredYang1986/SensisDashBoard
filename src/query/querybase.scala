@@ -8,12 +8,16 @@ package query
 import com.mongodb.casbah.Imports._
 import com.mongodb.casbah.query.dsl.QueryExpressionObject
 
-trait IQueryable {
+object _data_connection {
+	val _conn = MongoConnection()
+}
+
+trait IDatabaseContext {
 	def conn_name : String = "Alfred_Test"
 	var coll_name : String = null
 
-	private def openConnection : MongoCollection = MongoConnection()(conn_name)(coll_name)
-	private def closeConnection = null
+	protected def openConnection : MongoCollection = _data_connection._conn(conn_name)(coll_name)
+	protected def closeConnection = null
 }
 
 class ALINQ[T] {
@@ -43,7 +47,7 @@ object from {
 	def db() : AMongoDBLINQ = new AMongoDBLINQ
 }
 
-class AMongoDBLINQ extends IQueryable {
+class AMongoDBLINQ extends IDatabaseContext {
 	var w : DBObject = null
   
 	def in(l: String) : AMongoDBLINQ = {
@@ -64,13 +68,7 @@ class AMongoDBLINQ extends IQueryable {
 	
 	def select[U](cr: (MongoDBObject) => U) : List[U] = {
 	 
-		// Connecting to MongoDB
-		val mongoConn = MongoConnection()
-		// get DB
-		val mongoDB = mongoConn(conn_name)
-		// get DB collection or table
-		val mongoColl = mongoDB(coll_name)
-		
+		val mongoColl = openConnection
 		val ct = mongoColl.find(w).toList
 		for {
 			i <- ct
