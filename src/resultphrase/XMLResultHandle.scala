@@ -66,7 +66,8 @@ object TimeUserList {
     while (it.hasNext) {
       val (key, value) = it.next
       
-      value.saveUserList(key)
+//      value.saveUserList(key)
+      value.printUserList
     }
   }
 }
@@ -75,18 +76,18 @@ class UserList {
 
   var s: Map[String, printUser] = Map.empty
 
-  //  def printUserList = {
-  //    var it = s.iterator
-  //    while (it.hasNext) {
-  //      val (key, value) = it.next
-  //      println("User Key: " + key)
-  //      var it_in = value.callMethodMap.iterator
-  //      while (it_in.hasNext) {
-  //        val (me, times) = it_in.next
-  //        println("    " + me + ": " + times.toString)
-  //      }
-  //    }
-  //  }
+    def printUserList = {
+      var it = s.iterator
+      while (it.hasNext) {
+        val (key, value) = it.next
+        println("User Key: " + key)
+        var it_in = value.callMethodMap.iterator
+        while (it_in.hasNext) {
+          val (me, times) = it_in.next
+          println("    " + me + ": " + times.toString)
+        }
+      }
+    }
 
   def saveUserList(days: Long) = {
     // List to hold the User instances
