@@ -71,5 +71,5 @@ class Linq_List[T] extends IQueryable[T] {
 		nc
 	}
 	
-	override def toString = coll.toList.toString
+	override def toString = coll.toString
 }

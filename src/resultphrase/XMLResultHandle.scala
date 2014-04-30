@@ -5,8 +5,9 @@ import sensis.DBClient.DAO.User
 import sensis.DBClient.DataHandlerFacade
 import sensis.DBClient.DataBaseHandler
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.GregorianCalendar
+import java.util.Date
+import org.joda.time.Days
+import org.joda.time.DateTime
 
 object XMLResultHandle extends ResultHandle {
 
@@ -24,8 +25,9 @@ object XMLResultHandle extends ResultHandle {
 		  	  		var str_date : String = raw.substring(raw.indexOf('[') + 1, raw.indexOf(']'))
 		  	  		str_date = str_date.substring(0, str_date.indexOf(' '))
 		  	  		val query_date : java.util.Date = new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss").parse(str_date)
-		  	  		val days = new GregorianCalendar(query_date.getYear(),query_date.getMonth(),query_date.getDay())
-		  	  						.getTime().getTime() / (24*60*60*1000)
+		  	  		val base : java.util.Date = new Date(0, 0, 1)
+
+		  	  		val days = Days.daysBetween(new DateTime(base), new DateTime(query_date)).getDays()
 
 		  	  		var ul : UserList = null
 		  	  		if (TimeUserList.tu.contains(days))  ul = TimeUserList.tu.get(days).get
@@ -58,7 +60,8 @@ object XMLResultHandle extends ResultHandle {
 }
 
 object TimeUserList {
-  var tu: Map[Long, UserList] = Map.empty
+//  var tu: Map[Long, UserList] = Map.empty
+  var tu: Map[Int, UserList] = Map.empty
 
   def printUserList = {
     var it = tu.iterator
@@ -66,8 +69,9 @@ object TimeUserList {
     while (it.hasNext) {
       val (key, value) = it.next
       
-//      value.saveUserList(key)
-      value.printUserList
+      value.saveUserList(key)
+//    	  println(key)
+//      value.printUserList
     }
   }
 }
