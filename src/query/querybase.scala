@@ -9,15 +9,22 @@ import com.mongodb.casbah.Imports._
 import com.mongodb.casbah.query.dsl.QueryExpressionObject
 
 object _data_connection {
+	def conn_name : String = "SensisSAPIdb"
+
 	val _conn = MongoConnection()
+	var _conntion : Map[String, MongoCollection] = Map.empty
+	
+	def getCollection(coll_name : String) : MongoCollection = {
+		if (!_conntion.contains(coll_name)) _conntion += (coll_name -> _conn(conn_name)(coll_name))
+		
+		_conntion.get(coll_name).get
+	}
 }
 
 trait IDatabaseContext {
-	def conn_name : String = "SensisSAPIdb"
-	// def conn_name : String = "Alfred_Test"
 	var coll_name : String = null
 
-	protected def openConnection : MongoCollection = _data_connection._conn(conn_name)(coll_name)
+	protected def openConnection : MongoCollection = _data_connection._conn(_data_connection.conn_name)(coll_name)
 	protected def closeConnection = null
 }
 

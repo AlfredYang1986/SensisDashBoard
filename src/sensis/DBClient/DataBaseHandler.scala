@@ -19,6 +19,7 @@ import sensis.DBClient.DAO.User
 import sensis.DBClient.DAO.SplunkDataDAO
 import sensis.DBClient.DAO.SplunkDataDAO
 import scala.collection.immutable.ListMap
+import query._data_connection
 
 abstract class DataHandlerFacade {
 
@@ -32,8 +33,7 @@ class DataBaseHandler extends DataHandlerFacade {
 
     val iterator = userList.iterator
     // Getting data collection from DB
-    val conn = DBConnectionFactory.dbConnection()
-    val dataCollection = conn("SensisSAPIdb")(dbCollectionName)
+    val dataCollection = _data_connection.getCollection(dbCollectionName)
 
     while (iterator.hasNext) {
       val loggedUser: User = iterator.next

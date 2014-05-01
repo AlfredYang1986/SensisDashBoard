@@ -34,7 +34,6 @@ case class User(days: Long, userKey: String, metricesMap: Map[String, Any]) {
     var s: String = "key: " + userKey + ", queryDate:" + queryDate
     for ((key, value) <- metricesMap)
       s = s + ", " + key + ": " + value
-
     s
   }
 }

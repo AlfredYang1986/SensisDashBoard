@@ -49,15 +49,9 @@ object alfred_linq_test extends App {
 //	println(q2.orderby(x => x.y))
 //	println(q2.orderby(x => x.y).top(2))
 
-    val start = 40000
-    val end   = 42000
-    val b = 1
-    val e = 2
+    val start = 10000
+    val end   = 15000
     var query_test = from db () in "splunkdata" where ("days" $gte start $lt end) select
-//    var query_test = from db () in "splunkdata" where ("days" $lte end) select
-//    var query_test = from db () in "splunkdata" where ("days" $gte end) select
-//    var query_test = from db () in "splunkdata" where ("days" $gte start $lte end) select
-//    var query_test = from db () in "splunkdata" where ("search" $gte b $lte e) select
       {
         x => x
       }

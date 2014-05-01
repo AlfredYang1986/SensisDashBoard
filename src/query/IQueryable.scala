@@ -21,6 +21,10 @@ trait IQueryable[T] extends IEnumerable {
 	def top(count: Int) : IQueryable[T]
 
 	def :+(elem: TResult) : IQueryable[T]
+
+	def empty : Boolean
+	def count : Int 
+	def fistOrDefault : TResult
 }
 
 class Linq_List[T] extends IQueryable[T] {
@@ -63,13 +67,15 @@ class Linq_List[T] extends IQueryable[T] {
 		nc.coll = ncoll
 		nc
 	}
-	
 	def :+(elem: T) : IQueryable[T] = {
 		val nc = new Linq_List[T]
 		var ncoll = coll :+ elem
 		nc.coll = ncoll
 		nc
 	}
-	
+	def empty = coll.isEmpty
+	def count = coll.length 
+	def fistOrDefault = coll.head
+
 	override def toString = coll.toString
 }
