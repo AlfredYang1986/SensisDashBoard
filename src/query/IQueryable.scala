@@ -11,9 +11,6 @@ trait IEnumerable {
 
 trait IQueryable[T] extends IEnumerable {
 	type TResult = T
-	def AsQueryable : IQueryable[TResult]
-	def Case[T] : IEnumerable 
-	def OfType[T] : IEnumerable
 	
 	def orderby[U](f: (TResult) => U) : IQueryable[T]
 	def top(count: Int) : IQueryable[T]
