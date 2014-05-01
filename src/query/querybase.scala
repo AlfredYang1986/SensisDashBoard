@@ -9,7 +9,8 @@ import com.mongodb.casbah.Imports._
 import com.mongodb.casbah.query.dsl.QueryExpressionObject
 
 object _data_connection {
-	def conn_name : String = "SensisSAPIdb"
+//	def conn_name : String = "SensisSAPIdb"
+	def conn_name : String = "Alfred_Test"
 
 	val _conn = MongoConnection()
 	var _conntion : Map[String, MongoCollection] = Map.empty
@@ -24,7 +25,8 @@ object _data_connection {
 trait IDatabaseContext {
 	var coll_name : String = null
 
-	protected def openConnection : MongoCollection = _data_connection._conn(_data_connection.conn_name)(coll_name)
+	protected def openConnection : MongoCollection = 
+	  	_data_connection._conn(_data_connection.conn_name)(coll_name)
 	protected def closeConnection = null
 }
 
