@@ -23,7 +23,7 @@
 		
 		<query factory="SplunkApiQuery" >
 			<arg type="String" name="method" value="search" />
-			<arg type="String" name="duration" value="month" />
+			<arg type="String" name="duration" value="test" />
 		</query>
 	</Service>
 	

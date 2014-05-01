@@ -23,30 +23,39 @@ import org.apache.commons.io.IOUtils
 object MasheryProxy extends APIAbstractProxy with APIProxy {
 	def name = "Mashery Proxy"
 	override def request(url: String, key: APIKeyBase, args: APIArgumentsBase) {
-		val query = url + key.UrlString
-		val mUrl : URL = new URL(query)
-		val urlConn : HttpURLConnection = mUrl.openConnection().asInstanceOf[HttpURLConnection]
-		urlConn.setRequestMethod("POST");
-        urlConn.setDoOutput(true);
-        urlConn.setReadTimeout(10000);
+		def createConnection : HttpURLConnection = {
+		  	val urlConn : HttpURLConnection = new URL(url + key.UrlString)
+		  		.openConnection().asInstanceOf[HttpURLConnection]
+		  	
+		  	urlConn.setRequestMethod("POST");
+		  	urlConn.setDoOutput(true);
+		  	urlConn.setReadTimeout(10000);
 	
-		urlConn.addRequestProperty("Content-Type", "application/json")
-		urlConn.addRequestProperty("Accept", "text/plain")
-		urlConn.setRequestProperty("Content-Length", Integer.toString(args.toString().length()))
+		  	urlConn.addRequestProperty("Content-Type", "application/json")
+		  	urlConn.addRequestProperty("Accept", "text/plain")
+		  	urlConn.setRequestProperty("Content-Length", Integer.toString(args.toString().length()))
 
-		urlConn.connect();
-	
-		var wr : OutputStreamWriter = new OutputStreamWriter(urlConn.getOutputStream());
-        wr.write(args.toString)
-        wr.flush()
-		         
-        var re : String = ""
-        try {
-			re = IOUtils.toString(new InputStreamReader(urlConn.getInputStream()))
-        } catch {
-          case ex : IOException => println(ex.getMessage())
-          case _ : Throwable => throw Error_CallApiFail
-        } 
-        callback(re)
+		  	urlConn
+		}
+
+		def writeJSONBody(urlConn : HttpURLConnection) = {
+			val wr : OutputStreamWriter = new OutputStreamWriter(urlConn.getOutputStream());
+			wr.write(args.toString)
+			wr.flush()
+		}
+		
+		def readMasheryRes(urlConn : HttpURLConnection) : String = {
+			try {
+				IOUtils.toString(new InputStreamReader(urlConn.getInputStream()))
+			} catch {
+				case ex : IOException => println(ex.getMessage()); null
+				case _ : Throwable => throw Error_CallApiFail
+			} 
+		}
+		
+	    val urlConn = createConnection
+		urlConn.connect()
+	    writeJSONBody(urlConn)
+        callback(readMasheryRes(urlConn))
 	}
 }

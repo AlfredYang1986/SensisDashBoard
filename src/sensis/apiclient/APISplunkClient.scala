@@ -17,26 +17,31 @@ import sensis.SplunkKey
 import sensis.APISplunkArguments
 import java.util.Calendar
 import java.text.SimpleDateFormat
+import java.util.Date
 
 object SplunkProxy extends APIProxy {
-	override def request(url: String, key: APIKeyBase, args: APIArgumentsBase) {
-		key match {
-		  case SplunkKey => {
-			val service : Service = Service.connect(SplunkKey.loginArgs)
-//			val duration: String = args.asInstanceOf[APISplunkArguments].args.get("duration").get.asInstanceOf[String]
-			val date_format : SimpleDateFormat = new SimpleDateFormat("MM/dd/yyyy:HH:mm:ss")
-			// for test
-			val now_date : java.util.Date = date_format.parse("04/07/2014:03:00:00")
-			val early_data : java.util.Date = date_format.parse("03/31/2014:04:00:00")
+	override def request(url: String, key: APIKeyBase, args: APIArgumentsBase) = {
+		val date_format : SimpleDateFormat = new SimpleDateFormat("MM/dd/yyyy:HH:mm:ss")
+		val service = Service.connect(SplunkKey.loginArgs)
+		
+		def getStartDate(duration : String) : Date = duration match {
+		  case "test" => date_format.parse("03/31/2014:03:00:00")
+		  case "month" => val cal = Calendar.getInstance(); cal.setTime(new Date()); cal.add(Calendar.MONTH, -1); cal.getTime
+		  case _ => throw Error_PhraseXML
+		}
+		
+		def getEndDate(duration : String) : Date = duration match {
+		  case "test" => date_format.parse("04/07/2014:03:00:00")
+		  case "month" => val cal = Calendar.getInstance(); cal.setTime(new Date()); cal.getTime
+		  case _ => throw Error_PhraseXML
+		}
+		
+		def loopTimeSpan(st: Date, ed: Date) = {
 			var cal : Calendar = Calendar.getInstance()
-			cal.setTime(early_data)
-//			val now_date : java.util.Date = new java.util.Date()
-//			var cal : Calendar = Calendar.getInstance()
-//			cal.add(Calendar.MONTH, -1)
-//			var early_data : java.util.Date = cal.getTime()
+			cal.setTime(st)
 			// get data minutes by minutes
-			var it_time = early_data.getTime()
-			while (it_time < now_date.getTime()) {
+			var it_time = st.getTime()
+			while (it_time < ed.getTime()) {
 				val begin = cal.getTime()
 				cal.add(Calendar.MINUTE, 1)
 				val end = cal.getTime()
@@ -45,9 +50,12 @@ object SplunkProxy extends APIProxy {
 				callback(result)
 				it_time = end.getTime()
 			}
-			
-//			IOUtils.toString(service.export("search earliest=\"04/04/2014:00:00:00\" latest=\"04/04/2014:00:00:59\""))
-		  }
+		}
+		
+		key match {
+		  case SplunkKey => 
+			val duration = args.asInstanceOf[APISplunkArguments].args.get("duration")
+			.get.asInstanceOf[String];loopTimeSpan(getStartDate(duration), getEndDate(duration))
 		  case _ => throw Error_PhraseXML
 		}
 	}

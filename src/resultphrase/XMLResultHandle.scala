@@ -28,16 +28,34 @@ object XMLResultHandle extends ResultHandle {
 		  	  	
 		def getFunctionString(raw: String) : String = raw.substring(raw.indexOf('"'), raw.lastIndexOf('"'))
 		
+		
+		def phraseMethodName(s: String): String = 
+			if (s.contains('?')) s.substring(s.indexOf('/') + 1, s.indexOf('?'))
+			else s.substring(s.indexOf('/') + 1, s.lastIndexOf(' '))
+		
+
+		def phraseArguments(s: String): Map[String, String] = {
+			var re = Map.empty[String, String]
+			if (!s.contains('?')) return re
+
+			val sq = s.substring(s.indexOf('?') + 1, s.lastIndexOf(' '))
+			val sl: List[String] = sq.split("&").toList
+			for (it <- sl) {
+				if (!it.isEmpty() && it.contains('=')) {
+					re += (it.substring(0, it.indexOf('=')) -> it.substring(it.indexOf('=') + 1))
+				}
+			}
+			re
+		}
+		
 	  	println("Restoring Splunk Data ... ")
 		(scala.xml.XML.loadString("<root>" + result.substring(result.indexOf("?>") + 2) + "</root>") \\ "result" \ "field"). map { field =>
 			val k = (field \ "@k").text
 		  	if (k == "_raw") {
-		  	  	val str_date = getDateString(field.text)
-		  	  	val days = getCallDays(str_date)
 		  	  	val raw = getFunctionString(field.text)
-		  	  	val method_name = RoutePhraseSplunk.phraseMethodName(raw)
-		  	  	val temp = RoutePhraseSplunk.phraseArguments(raw)
-		  	  	val user_key = getUserKey(temp)
+		  	  	val days = getCallDays(getDateString(field.text))
+		  	  	val user_key = getUserKey(phraseArguments(raw))
+		  	  	val method_name = phraseMethodName(raw)
 		  	  	val query = from db() in "splunkdata" where ("days" $eq days, "key" $eq user_key) select (x=>x)
 		  	  	if (query.empty) _data_connection.getCollection("splunkdata") += MongoDBObject("days" -> days, "key" -> user_key, method_name -> 1)
 		  	  	else _data_connection.getCollection("splunkdata") update(query.fistOrDefault, RoutePhraseSplunk.addFunctionCalls(query.fistOrDefault, method_name))

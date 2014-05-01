@@ -31,10 +31,7 @@ object RoutePhraseSplunk {
     else s.substring(s.indexOf('/') + 1, s.lastIndexOf(' '))
   }
   
-//  def phraseArguments(s: String): List[String] = {
   def phraseArguments(s: String): Map[String, String] = {
-//    var re: Map[String, String] = Map.empty
-//    var re: List[String] = Nil
     re = Map.empty
     if (!s.contains('?')) return re
 
@@ -42,10 +39,7 @@ object RoutePhraseSplunk {
     val sl: List[String] = sq.split("&").toList
     for (it <- sl) {
       if (!it.isEmpty() && it.contains('=')) {
-//        val s_1 = it.substring(0, it.indexOf('='))
-//        val s_2 = it.substring(it.indexOf('=') + 1)
         re += (it.substring(0, it.indexOf('=')) -> it.substring(it.indexOf('=') + 1))
-//          re :+ it.substring(0, it.indexOf('='))
       }
     }
     re
