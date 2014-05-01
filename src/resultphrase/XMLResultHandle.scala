@@ -1,9 +1,11 @@
+/**
+ * store splunk data to the database
+ * Created By Alfred Yang
+ */
+
 package resultphrase
 
 import scala.xml.XML._
-import sensis.DBClient.DAO.User
-import sensis.DBClient.DataHandlerFacade
-import sensis.DBClient.DataBaseHandler
 import java.text.SimpleDateFormat
 import java.util.Date
 import org.joda.time.Days
@@ -47,6 +49,14 @@ object XMLResultHandle extends ResultHandle {
 			}
 			re
 		}
+
+		def addFunctionCalls(left : MongoDBObject, right: String): DBObject = {
+			val bd = MongoDBObject.newBuilder
+			val method_name = right.replace('.', '_')
+			var times = left.getAsOrElse(method_name, 0)
+			bd += (method_name -> (times + 1))
+			(left ++ bd.result)
+		}
 		
 	  	println("Restoring Splunk Data ... ")
 		(scala.xml.XML.loadString("<root>" + result.substring(result.indexOf("?>") + 2) + "</root>") \\ "result" \ "field"). map { field =>
@@ -58,7 +68,7 @@ object XMLResultHandle extends ResultHandle {
 		  	  	val method_name = phraseMethodName(raw)
 		  	  	val query = from db() in "splunkdata" where ("days" $eq days, "key" $eq user_key) select (x=>x)
 		  	  	if (query.empty) _data_connection.getCollection("splunkdata") += MongoDBObject("days" -> days, "key" -> user_key, method_name -> 1)
-		  	  	else _data_connection.getCollection("splunkdata") update(query.fistOrDefault, RoutePhraseSplunk.addFunctionCalls(query.fistOrDefault, method_name))
+		  	  	else _data_connection.getCollection("splunkdata") update(query.fistOrDefault, addFunctionCalls(query.fistOrDefault, method_name))
 		  	}
 
 		}

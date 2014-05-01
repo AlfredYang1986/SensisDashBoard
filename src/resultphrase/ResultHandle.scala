@@ -1,3 +1,8 @@
+/**
+ * interface for handle result
+ * Created by Alfred Yang
+ */
+
 package resultphrase
 
 trait ResultHandle {

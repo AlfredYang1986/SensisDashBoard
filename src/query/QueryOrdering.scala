@@ -1,3 +1,8 @@
+/**
+ * ordering and comparing
+ * Created By Alfred Yang
+ */
+
 package query
 
 class QueryOrdering[T] extends Ordering[T] {

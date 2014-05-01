@@ -1,3 +1,8 @@
+/**
+ * make unique interface for all the ALINQ query
+ * Created By Alfred Yang
+ */
+
 package query
 
 trait IEnumerable {
