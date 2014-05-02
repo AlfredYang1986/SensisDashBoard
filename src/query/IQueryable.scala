@@ -24,7 +24,7 @@ trait IQueryable[T] extends IEnumerable {
 
 	def empty : Boolean
 	def count : Int 
-	def fistOrDefault : TResult
+	def fistOrDefault : Option[TResult]
 	def aggregate[U](prop : TResult => U, op : List[TResult] => TResult) : IQueryable[T]
 	def distinctBy[U](prop : TResult => U) : IQueryable[U]
 	
@@ -81,7 +81,7 @@ class Linq_List[T] extends IQueryable[T] {
 	}
 	def empty = coll.isEmpty
 	def count = coll.length 
-	def fistOrDefault = coll.head
+	def fistOrDefault = if (coll.isEmpty) None else Some(coll.head)
 	def aggregate[U](prop : TResult => U, op : List[TResult] => TResult) : IQueryable[T] = {
 		val distinct_query = distinctBy(prop)
 		val nc = new Linq_List[T]

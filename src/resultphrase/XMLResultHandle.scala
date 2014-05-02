@@ -68,7 +68,7 @@ object XMLResultHandle extends ResultHandle {
 		  	  	val method_name = phraseMethodName(raw)
 		  	  	val query = from db() in "splunkdata" where ("days" $eq days, "key" $eq user_key) select (x=>x)
 		  	  	if (query.empty) _data_connection.getCollection("splunkdata") += MongoDBObject("days" -> days, "key" -> user_key, method_name -> 1)
-		  	  	else _data_connection.getCollection("splunkdata") update(query.fistOrDefault, addFunctionCalls(query.fistOrDefault, method_name))
+		  	  	else _data_connection.getCollection("splunkdata") update(query.fistOrDefault.get, addFunctionCalls(query.fistOrDefault.get, method_name))
 		  	}
 
 		}	  	
