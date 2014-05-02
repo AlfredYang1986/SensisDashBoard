@@ -71,6 +71,21 @@ object XMLResultHandle extends ResultHandle {
 		  	  	else _data_connection.getCollection("splunkdata") update(query.fistOrDefault, addFunctionCalls(query.fistOrDefault, method_name))
 		  	}
 
-		}
+		}	  	
+	  	
+	}
+	
+	/* TODO: Stubs to save queries and enpoints to DB*/
+	object addAllEndPoints {
+	  var endPointList:List[String] = List.empty
+	  
+	  def saveAllEndPoints(){
+	    
+	  }
+	}
+	
+	/* TODO: Stubs to save queries and enpoints to DB*/
+	object addDistinctQueryAndLocation{
+	  
 	}
 }
