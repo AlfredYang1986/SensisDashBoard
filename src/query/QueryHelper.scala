@@ -8,11 +8,16 @@ object QueryHelper {
 	def queryByUserKey(key: String) : SensisQueryElement => Boolean = x => key == x.getProperty("key")
 	
 	def queryByUserKeyDB(key: String) : DBObject = ("key" $eq key)
+
+	def queryBetweenTimespan(st: Int, ed: Int) : SensisQueryElement => Boolean = x => 
+	  	x.getProperty[Int]("days") >= st && x.getProperty[Int]("days") <= ed
+
+	def queryBetweenTimespanDB(st: Int, ed: Int) : DBObject = ("days" $gte st $lte ed)
 	
 	def queryByUserKeyBetweenTimespan(key: String, st: Int, ed: Int) : SensisQueryElement => Boolean = 
-		x => (key == x.getProperty("key")) && x.getProperty[Int]("days") >= st && x.getProperty[Int]("days") < ed
+		x => (key == x.getProperty("key")) && x.getProperty[Int]("days") >= st && x.getProperty[Int]("days") <= ed
 	
-	def queryByUserKeyBetweenTimespanDB(key: String, st: Int, ed: Int) : DBObject = ("key" $eq key) ++ ("days" $gte st $lt ed)
+	def queryByUserKeyBetweenTimespanDB(key: String, st: Int, ed: Int) : DBObject = ("key" $eq key) ++ ("days" $gte st $lte ed)
 	
 	def discintByUserKey[T] : T => String = x => x match {
 	  case x : SensisQueryElement => x.getProperty[String]("key")

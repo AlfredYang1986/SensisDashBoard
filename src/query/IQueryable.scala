@@ -18,6 +18,7 @@ trait IQueryable[T] extends IEnumerable {
 	type TResult = T
 	
 	def orderby[U](f: (TResult) => U) : IQueryable[T]
+	def orderbyDecsending[U](f: (TResult) => U) : IQueryable[T]
 	def top(count: Int) : IQueryable[T]
 
 	def :+(elem: TResult) : IQueryable[T]
@@ -57,6 +58,12 @@ class Linq_List[T] extends IQueryable[T] {
 		var nc = new Linq_List[T]
 		val ls : List[T] = coll.sortBy(f)(new QueryOrdering[U])
 		nc.coll = ls
+		nc
+	}
+	def orderbyDecsending[U](f: (TResult) => U) : IQueryable[T] = {
+		var nc = new Linq_List[T]
+		val ls : List[T] = coll.sortBy(f)(new QueryOrdering[U])
+		nc.coll = ls.reverse
 		nc
 	}
 	def top(count: Int) : IQueryable[T] = {
