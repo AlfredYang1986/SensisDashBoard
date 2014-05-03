@@ -35,8 +35,10 @@ object SplunkProxy extends APIProxy {
 		  case "month" => val cal = Calendar.getInstance(); cal.setTime(new Date()); cal.getTime
 		  case _ => throw Error_PhraseXML
 		}
-		
+	
 		def loopTimeSpan(st: Date, ed: Date) = {
+			def presentage(n: Date) : Double = (n.getTime() - st.getTime()) * 100.0 / (ed.getTime() - st.getTime())
+			
 			var cal : Calendar = Calendar.getInstance()
 			cal.setTime(st)
 			// get data minutes by minutes
@@ -45,6 +47,7 @@ object SplunkProxy extends APIProxy {
 				val begin = cal.getTime()
 				cal.add(Calendar.MINUTE, 1)
 				val end = cal.getTime()
+				println(presentage(end))
 				val s: String = "search earliest=\"" + date_format.format(begin) + "\" latest=\"" + date_format.format(end) + "\""
 				val result = IOUtils.toString(service.export(s))
 				callback(result)

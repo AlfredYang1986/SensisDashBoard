@@ -70,9 +70,7 @@ object XMLResultHandle extends ResultHandle {
 		  	  	if (query.empty) _data_connection.getCollection("splunkdata") += MongoDBObject("days" -> days, "key" -> user_key, method_name -> 1)
 		  	  	else _data_connection.getCollection("splunkdata") update(query.fistOrDefault.get, addFunctionCalls(query.fistOrDefault.get, method_name))
 		  	}
-
 		}	  	
-	  	
 	}
 	
 	/* TODO: Stubs to save queries and enpoints to DB*/
