@@ -7,7 +7,8 @@ class SensisQueryElement {
 	
 	def getProperty[T](name : String) : T = {
 	  	val query = (from[Property] in args where (x => x.name == name) select (x => x)).fistOrDefault
-	  	query.get.asInstanceOf[T]
+	  	if (query.isEmpty) null.asInstanceOf[T]
+	  	else query.get.get.asInstanceOf[T]
 	}
 	
 	def insertProperty[T](name : String, value : T) = {
@@ -17,6 +18,9 @@ class SensisQueryElement {
 	  	if (query.isEmpty) args = args :+ propertyInstance
 	  	else query.get.asInstanceOf[CommonProperty[T]].set(value)
 	}
+	
+	def contains(name : String) : Boolean = 
+		((from[Property] in args where (x => x.name == name) select (x => x)).fistOrDefault).isEmpty
 	
 	override def toString = args.toString
 }

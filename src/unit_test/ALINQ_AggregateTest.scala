@@ -1,6 +1,7 @@
 package unit_test
 
 import query.from
+import query.QueryHelper
 
 case class ag_test(user : String, value : Int)
 
@@ -32,4 +33,26 @@ object ALINQ_AggregateTest extends App {
 	    })
 	    
 	println(agg)
+
+	val t = null.asInstanceOf[Int]
+	t match {
+	  case tm : Int => println(tm)
+	  case _ => println("Other")
+	}
+	
+	val query_db = from db() in "splunkdata" where 
+				   (QueryHelper.queryByUserKeyDB("71da34f94aaae4d4d4d7b9d930b275d2")) select 
+				   QueryHelper.querySplunkDBOToQueryObject("search", "singleSearch")
+				   
+	println(query_db)
+	
+	println(query_db.distinctBy(QueryHelper.discintByUserKey))
+	println(query_db.aggregate(QueryHelper.discintByUserKey, QueryHelper.AggregateSumSplunkData("search")))
+	println(query_db.aggregate(QueryHelper.AggregateByProperty("key"), QueryHelper.AggregateSumSplunkData("search", "singleSearch")))
 }
+
+
+
+
+
+
