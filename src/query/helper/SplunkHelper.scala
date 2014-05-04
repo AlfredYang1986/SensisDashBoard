@@ -1,10 +1,9 @@
-package query
+package query.helper
 
 import query.property.SensisQueryElement
 import com.mongodb.casbah.Imports._
-import com.mongodb.casbah.query.dsl.QueryExpressionObject
 
-object QueryHelper {
+object SplunkHelper {
 	def queryByUserKey(key: String) : SensisQueryElement => Boolean = x => key == x.getProperty("key")
 	
 	def queryByUserKeyDB(key: String) : DBObject = ("key" $eq key)
@@ -29,7 +28,6 @@ object QueryHelper {
 	  case _ => ???
 	}
 
-//	def AggregateSumBySearch : List[SensisQueryElement] => SensisQueryElement = ls => {
 	def AggregateSumSplunkData(args : String*) : List[SensisQueryElement] => SensisQueryElement = ls => {
 		val reVal = new SensisQueryElement
 		reVal.insertProperty("key", ls.head.getProperty("key"))
