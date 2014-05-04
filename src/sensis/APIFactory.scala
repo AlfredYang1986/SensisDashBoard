@@ -59,7 +59,7 @@ object APIFactory {
 
 		def getResultHandle(name: String) : ResultHandle = name match {
 			case "SplunkXML" => SplunkResultHandle
-			case "MasheryJSON" => PrintlnResultHandle
+			case "MasheryJSON" => MasheryReulstHandle
 			case _ => PrintlnResultHandle
 		}
 		
