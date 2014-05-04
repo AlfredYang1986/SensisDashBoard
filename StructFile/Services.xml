@@ -1,5 +1,5 @@
 <Services>
-	<Service name="Mashery-Sandbox" url="http://api.mashery.com/v2/json-rpc/248?" resultHandle="MasheryJSON" >
+	<Service name="Mashery" url="http://api.mashery.com/v2/json-rpc/248?" resultHandle="MasheryJSON" >
 		<key factory="MasheryKey">
 			<arg name="key" value="guk5rz7ppws5gua83ydqguyj" />
 			<arg name="secret" value="SMuM465JJG" />
@@ -8,23 +8,8 @@
 		</key>
 		<query factory="JOSN-RPC">
 			<arg type="String" name="method" value="object.query" />
-			<arg type="StringList" name="params" value="SELECT * FROM members PAGE 2" />
+			<arg type="StringList" name="params" value="SELECT * FROM members PAGE %d" />
 			<arg type="Int" name="id" value="1" />
 		</query>
 	</Service> 
-
-	<Service name="Splunk" url="http://localhost:8089" resultHandle="SplunkXML" >
-		<key factory="SplunkKey">
-			<arg name="username" value="admin" />
-			<arg name="password" value="Abcde196125" />
-			<arg name="host" value="localhost" />
-			<arg name="port" value="8089" />
-		</key>
-		
-		<query factory="SplunkApiQuery" >
-			<arg type="String" name="method" value="search" />
-			<arg type="String" name="duration" value="test" />
-		</query>
-	</Service>
-	
 </Services>

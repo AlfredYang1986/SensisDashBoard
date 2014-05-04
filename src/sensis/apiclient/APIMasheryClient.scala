@@ -19,6 +19,7 @@ import errorreport.Error_CallApiFail
 import sensis.APIKeyBase
 import sensis.APIArgumentsBase
 import org.apache.commons.io.IOUtils
+import jsondataparse.parser
 
 object MasheryProxy extends APIAbstractProxy with APIProxy {
 	def name = "Mashery Proxy"
@@ -38,9 +39,9 @@ object MasheryProxy extends APIAbstractProxy with APIProxy {
 		  	urlConn
 		}
 
-		def writeJSONBody(urlConn : HttpURLConnection) = {
+		def writeJSONBody(urlConn : HttpURLConnection, c : String) = {
 			val wr : OutputStreamWriter = new OutputStreamWriter(urlConn.getOutputStream());
-			wr.write(args.toString)
+			wr.write(c)
 			wr.flush()
 		}
 		
@@ -52,10 +53,23 @@ object MasheryProxy extends APIAbstractProxy with APIProxy {
 				case _ : Throwable => throw Error_CallApiFail
 			} 
 		}
-		
+
+		def getTotalPages(result : String) : Int = 
+		  parser.parse(result, List("result")).get("result").get.asInstanceOf[Map[String, Any]]
+		  .get("total_pages").get.asInstanceOf[Double].toInt
+	
 	    val urlConn = createConnection
 		urlConn.connect()
-	    writeJSONBody(urlConn)
-        callback(readMasheryRes(urlConn))
+	    writeJSONBody(urlConn, args.toString.format(1))
+        val result = readMasheryRes(urlConn)
+		urlConn.disconnect()
+        val total_pages = getTotalPages(result)
+        for (cur <- 1 to total_pages) {
+        		val urlConnIter = createConnection
+        		urlConnIter.connect()
+        		writeJSONBody(urlConnIter, args.toString.format(cur))
+        		callback(readMasheryRes(urlConnIter))
+        		urlConnIter.disconnect()
+        }
 	}
 }

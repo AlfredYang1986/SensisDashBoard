@@ -14,7 +14,7 @@ import query._
 import com.mongodb.casbah.Imports._
 import com.mongodb.casbah.query.dsl.QueryExpressionObject
 
-object XMLResultHandle extends ResultHandle {
+object SplunkResultHandle extends ResultHandle {
 	def apply(result: String) = {
 		def getUserKey(mp: Map[String, String]) : String = 
 		  	mp.get("key") match{

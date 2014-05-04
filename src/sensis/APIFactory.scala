@@ -58,9 +58,9 @@ object APIFactory {
 		}
 
 		def getResultHandle(name: String) : ResultHandle = name match {
-			case "SplunkXML" => XMLResultHandle
+			case "SplunkXML" => SplunkResultHandle
 			case "MasheryJSON" => PrintlnResultHandle
-			case _ => null
+			case _ => PrintlnResultHandle
 		}
 		
 		for (se <- ((service_xml_pharse(xmlPath) \\ "Service").map { se =>
