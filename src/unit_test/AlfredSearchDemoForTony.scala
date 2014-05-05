@@ -2,6 +2,8 @@ package unit_test
 
 import query._
 import query.helper._
+import scala.collection.mutable.MultiMap
+import scala.util.parsing.json.JSONObject
 
 object AlfredSearchDemoForTony extends App {
 	// query by key 
@@ -44,4 +46,22 @@ object AlfredSearchDemoForTony extends App {
 
 	println(query_top.count)
 	println(query_top)
+
+	var m : Map[String, Any] = Map.empty
+	var index = 0
+	query_top.toList.map(x => {
+		var tm : Map[String, Any] = Map.empty
+		x.args.map(y => tm += (y.name -> y.get))
+		m += ("item%d".format(index) -> tm)
+		index = index + 1
+	})
+	
+	println(m)
+	println(new JSONObject(m))
+	
+	val query_001 = query_top.top(1)
+	var m1 : Map[String, Any] = Map.empty
+	query_001.toList.map(x => x.args.map(y => m1 += (y.name -> y.get)))
+	println(m1)
+	println(new JSONObject(m1))
 }
