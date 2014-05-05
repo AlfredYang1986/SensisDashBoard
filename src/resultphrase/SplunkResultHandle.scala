@@ -13,6 +13,8 @@ import org.joda.time.DateTime
 import query._
 import com.mongodb.casbah.Imports._
 import com.mongodb.casbah.query.dsl.QueryExpressionObject
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 object SplunkResultHandle extends ResultHandle {
   def apply(result: String) = {
@@ -101,14 +103,26 @@ object SplunkResultHandle extends ResultHandle {
         case Some(e) => e
         case none => ""
       }
-    val userQueries = getUserQuery.toString().split('+')
+
+    // Old school Regex matching for eliminating special characters.
+    val decodeResult: String = java.net.URLDecoder.decode((getUserQuery.toString()), "UTF-8")
+    var userQueries: Array[String] = Array.empty
+    val pattern: Pattern = Pattern.compile("\\W");
+    val matcher: Matcher = pattern.matcher(decodeResult)
+    if (matcher.find()) {
+      userQueries = (matcher.replaceAll(" ")).split(" ")
+    }
 
     def getLocation(): String =
       argsMap.get("location") match {
         case Some(e) => e
         case none => ""
       }
-    val location = (getLocation.toString().replaceFirst("\\+", " ").replace('+', ',').trim()).toLowerCase
+    var location = getLocation
+    if (location.count(_ == '+') > 1)
+      location = (location.replaceFirst("\\+", " ").replace('+', ',').trim).toLowerCase
+    else
+      location = (location.replace('+', ',').trim).toLowerCase
 
     def addQueryOccurance(left: MongoDBObject) = {
       val newDbObj = MongoDBObject.newBuilder
