@@ -1,6 +1,13 @@
 package sensis.DBClient
 
 import sensis.DBClient.DAO.SplunkDataDAO
+import query.property.SensisQueryElement
+import query._
+import org.joda.time.Days
+import org.joda.time.ReadableInstant
+import org.joda.time.DateTime
+import java.text.SimpleDateFormat
+import query.helper.SplunkHelper
 
 /*
  * TODO: Stub class to handle splunk data collection.
@@ -10,8 +17,13 @@ class LINQ_SplunkDBHandler {
   /**
    * Retrieve a single user object with the function calls summed-up.
    */
-  def getEachUserByKey(startDate: String, endDate: String, logSourceName: String, ukey: String): List[SplunkDataDAO] = {
-    null
+  def getEachUserByKey(startDate: String, endDate: String, logSourceName: String, ukey: String): List[SensisQueryElement] = {
+    val start = getIntDays(startDate)
+    val end = getIntDays(endDate)
+    var q_data = from db () in "spdatatest" where (SplunkHelper.queryBetweenTimespanDB(start, end), SplunkHelper.queryByUserKeyDB(ukey)) select
+      SplunkHelper.querySplunkDBOToQueryObject(List[String]("search", "getListingById"))
+
+    q_data.toList
   }
 
   /**
@@ -23,30 +35,39 @@ class LINQ_SplunkDBHandler {
 
   /**
    * Retrieve distinct users with the function calls summed-up.
+   *
+   * @param startDate	Start date of the range
+   * @param endDate	End date of the range
+   * @param logSourceName
+   * @param top	Get number of top users based on "search" end-point.
+   * @return	A list of SensisQueryElements
    */
-  def getDistinctUsers(startDate: String, endDate: String, logSourceName: String): List[SplunkDataDAO] = {
-    null
-  }
+  def getDistinctUsers(startDate: String, endDate: String, logSourceName: String, top: Int): List[SensisQueryElement] = {
+    val start = getIntDays(startDate)
+    val end = getIntDays(endDate)
 
-  /**
-   * Return the top ten distinct users.
-   */
-  def getTopTenUsers(startDate: String, endDate: String, logSourceName: String): List[SplunkDataDAO] = {
-    null
+    var q_data = from db () in "spdatatest" where (SplunkHelper.queryBetweenTimespanDB(start, end)) select
+      SplunkHelper.querySplunkDBOToQueryObject(List[String]("search", "getByListingId"))
+    val distinctUsers = q_data.aggregate(
+      SplunkHelper.AggregateByProperty("key"),
+      SplunkHelper.AggregateSumSplunkData(List[String]("search", "getByListingId")))
+      .orderbyDecsending(x => { x.getProperty[Int]("search") })
+
+    if (top == 0)
+      distinctUsers.toList
+    else
+      distinctUsers.top(top).toList
   }
 
   /**
    * Provide the function usage for each distinct function, in descending order.
    */
   def getFunctionUsage(startDate: String, endDate: String, logSourceName: String) {
-
   }
 
-  def getIntDays(date: String): Int = {
-    0
-  }
-
-  def sortForTopTen(numOfCalls: List[SplunkDataDAO]): List[SplunkDataDAO] = {
-    null
+  def getIntDays(dateStr: String): Int = {
+    val givenDate = new SimpleDateFormat("dd/MMM/yyyy").parse(dateStr)
+    val daysInRange: Int = Days.daysBetween(new DateTime(BaseTimeSpan.base), new DateTime(givenDate)).getDays()
+    daysInRange
   }
 }
