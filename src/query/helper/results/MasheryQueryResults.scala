@@ -1,16 +1,18 @@
-package sensis.DBClient
+package query.helper.results
 
 import java.text.SimpleDateFormat
-import org.joda.time.Days
+
 import org.joda.time.DateTime
-import query.BaseTimeSpan
-import query.helper.MasheryHelper
-import query.from
-import query.property.SensisQueryElement
-import com.mongodb.casbah.Imports.IntDoNOk
+import org.joda.time.Days
+
 import com.mongodb.casbah.Imports.mongoQueryStatements
 
-class MasheryDBHandler {
+import query.BaseTimeSpan
+import query.from
+import query.helper.MasheryHelper
+import query.property.SensisQueryElement
+
+class MasheryQueryResults {
 
   def getUserCountForGivenDate(dateStr: String): Int = {
     val queryData = from db () in "masherydata" where ("created" $regex dateStr) select MasheryHelper.queryMasheryDBOToQueryObject("email", "username")
@@ -27,7 +29,7 @@ class MasheryDBHandler {
   }
 
   def getIntDays(dateStr: String): Int = {
-    val givenDate = new SimpleDateFormat("dd/MMM/yyyy").parse(dateStr)
+    val givenDate = (new SimpleDateFormat("dd/MMM/yyyy")).parse(dateStr)
     val daysInRange: Int = Days.daysBetween(new DateTime(BaseTimeSpan.base), new DateTime(givenDate)).getDays()
     daysInRange
   }

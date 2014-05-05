@@ -1,10 +1,7 @@
-package sensis.DBClient
-
-import sensis.DBClient.DAO.SplunkDataDAO
+package query.helper.results
 import query.property.SensisQueryElement
 import query._
 import org.joda.time.Days
-import org.joda.time.ReadableInstant
 import org.joda.time.DateTime
 import java.text.SimpleDateFormat
 import query.helper.SplunkHelper
@@ -12,7 +9,7 @@ import query.helper.SplunkHelper
 /*
  * TODO: Stub class to handle splunk data collection.
  */
-class LINQ_SplunkDBHandler {
+class SplunkQueryResults {
 
   /**
    * Retrieve a single user object with the function calls summed-up.
