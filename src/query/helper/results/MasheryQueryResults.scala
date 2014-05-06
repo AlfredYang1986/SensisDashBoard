@@ -29,7 +29,7 @@ class MasheryQueryResults {
    *	Get user counts for a given date range.
    * 	@return	As a JSONObject {dateStr : count} 
    */
-  def getUserCountForDateRange(startDate: String, endDate:String): JSONObject = {
+  def getUserCountForDateRange(startDate: String, endDate:String): List[SensisQueryElement] = {
      
     var userCountMap:TreeMap[String,Int] = TreeMap.empty
     val end: Date = new SimpleDateFormat("yyyy-MM-dd").parse(endDate)    
@@ -45,7 +45,8 @@ class MasheryQueryResults {
             
       rangeCounter.add(Calendar.DATE, 1)
     }
-    new JSONObject(userCountMap)
+//    new JSONObject(userCountMap)
+    Nil
   }
 
   def getUserDetails(userKey: String): List[SensisQueryElement] = {

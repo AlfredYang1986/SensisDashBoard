@@ -65,13 +65,13 @@ class SplunkQueryResults {
    */
   def getFunctionUsage(startDate: String, endDate: String, logSourceName: String) {
 
-    val queryData = from db () in "splunkdata" where (SplunkHelper.queryBetweenTimespanDB(getIntDays(startDate), getIntDays(endDate))) select
-      (x => x)
-    val distinctUsers = queryData.aggregate(
-      SplunkHelper.AggregateByProperty("days"),
-      SplunkHelper.AggregateSumSplunkData(y => {y.getProperty[Int]("search") }))
-      .orderbyDecsending(x => { x.getProperty[Int]("search") })
-    distinctUsers.toList.foreach(println)
+//    val queryData = from db () in "splunkdata" where (SplunkHelper.queryBetweenTimespanDB(getIntDays(startDate), getIntDays(endDate))) select
+//      (x => x)
+//    val distinctUsers = queryData.aggregate(
+//      SplunkHelper.AggregateByProperty("days"),
+//      SplunkHelper.AggregateSumSplunkData(y => {y.getProperty[Int]("search") }))
+//      .orderbyDecsending(x => { x.getProperty[Int]("search") })
+//    distinctUsers.toList.foreach(println)
   }
 
   def getIntDays(dateStr: String): Int = {
@@ -81,7 +81,8 @@ class SplunkQueryResults {
     daysInRange
   }
 
-  def getQueryOccurances(queryStr: String, queryType: String): JSONObject = {
+  def getQueryOccurances(queryStr: String, queryType: String): List[SensisQueryElement] = {
+//  def getQueryOccurances(queryStr: String, queryType: String): JSONObject = {
     val qWords: Array[String] = queryStr.split(" ")
     var dataMap: Map[String, List[SensisQueryElement]] = Map.empty
 
@@ -96,6 +97,9 @@ class SplunkQueryResults {
         dataMap += (word -> queryData.toList)
       }
     }
-    new JSONObject(dataMap)
+//    new JSONObject(dataMap)
+    var reVal : List[SensisQueryElement] = Nil
+    for (t <- dataMap) reVal = reVal ::: t._2
+    reVal
   }
 }
