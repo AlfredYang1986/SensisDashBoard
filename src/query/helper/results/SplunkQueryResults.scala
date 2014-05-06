@@ -47,7 +47,7 @@ class SplunkQueryResults {
     val start = getIntDays(startDate)
     val end = getIntDays(endDate)
 
-    var q_data = from db () in "spdatatest" where (SplunkHelper.queryBetweenTimespanDB(start, end)) select
+    var q_data = from db () in "splunkdata" where (SplunkHelper.queryBetweenTimespanDB(start, end)) select
       SplunkHelper.querySplunkDBOToQueryObject(List[String]("search", "getByListingId"))
     val distinctUsers = q_data.aggregate(
       SplunkHelper.AggregateByProperty("key"),
@@ -65,10 +65,18 @@ class SplunkQueryResults {
    */
   def getFunctionUsage(startDate: String, endDate: String, logSourceName: String) {
 
+    val queryData = from db () in "splunkdata" where (SplunkHelper.queryBetweenTimespanDB(getIntDays(startDate), getIntDays(endDate))) select
+      (x => x)
+    val distinctUsers = queryData.aggregate(
+      SplunkHelper.AggregateByProperty("days"),
+      SplunkHelper.AggregateSumSplunkData(y => {y.getProperty[Int]("search") }))
+      .orderbyDecsending(x => { x.getProperty[Int]("search") })
+    distinctUsers.toList.foreach(println)
   }
 
   def getIntDays(dateStr: String): Int = {
-    val givenDate = new SimpleDateFormat("dd/MMM/yyyy").parse(dateStr)
+    var givenDate = new SimpleDateFormat("dd-MM-yyyy").parse(dateStr)
+    givenDate = new SimpleDateFormat("dd/MMM/yyyy").parse(new SimpleDateFormat("dd/MMM/yyyy").format(givenDate))
     val daysInRange: Int = Days.daysBetween(new DateTime(BaseTimeSpan.base), new DateTime(givenDate)).getDays()
     daysInRange
   }
@@ -79,8 +87,11 @@ class SplunkQueryResults {
 
     for (word <- qWords) {
       if (word != "") {
-        val queryData = from db () in "splunk_query_data" where (queryType.toLowerCase.trim $regex word.trim.toLowerCase) select
-          SplunkHelper.getSplunkQueriesToObject("query", "location", "occurances")
+        val queryData = from db () in "splunk_query_data" where (
+          if ((queryType.toLowerCase.trim).equals("query"))
+            queryType.toLowerCase.trim $eq word.trim.toLowerCase
+          else
+            queryType.toLowerCase.trim $regex word.trim.toLowerCase) select SplunkHelper.getSplunkQueriesToObject("query", "location", "occurances")
 
         dataMap += (word -> queryData.toList)
       }
