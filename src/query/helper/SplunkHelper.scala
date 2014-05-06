@@ -85,4 +85,17 @@ object SplunkHelper {
     }
     reVal
   }
+
+  /**
+   * User information with the "days"
+   */
+  def querySplunkDBOWithDays(args: List[String]): MongoDBObject => SensisQueryElement = x => {
+    val reVal = new SensisQueryElement    
+    reVal.insertProperty("key", x.getAs[String]("key").get)
+    for (it <- args) {
+      if (it != "key")
+        reVal.insertProperty(it, x.getAsOrElse(it, 0))
+    }
+    reVal
+  }
 }

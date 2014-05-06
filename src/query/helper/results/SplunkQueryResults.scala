@@ -1,14 +1,20 @@
 package query.helper.results
 
-import query.property.SensisQueryElement
-import query._
-import org.joda.time.Days
-import org.joda.time.DateTime
 import java.text.SimpleDateFormat
-import query.helper.SplunkHelper
+
+import scala.collection.immutable.Map
+import scala.collection.immutable.TreeMap
+import scala.util.parsing.json.JSONObject
+
+import org.joda.time.DateTime
+import org.joda.time.Days
+
 import com.mongodb.casbah.Imports.mongoQueryStatements
-import scala.util.parsing.json.JSONObject
-import scala.util.parsing.json.JSONObject
+
+import query.BaseTimeSpan
+import query.from
+import query.helper.SplunkHelper
+import query.property.SensisQueryElement
 
 /*
  * TODO: Stub class to handle splunk data collection.
@@ -21,7 +27,7 @@ class SplunkQueryResults {
   def getEachUserByKey(startDate: String, endDate: String, logSourceName: String, ukey: String): List[SensisQueryElement] = {
     val start = getIntDays(startDate)
     val end = getIntDays(endDate)
-    var q_data = from db () in "spdatatest" where (SplunkHelper.queryBetweenTimespanDB(start, end), SplunkHelper.queryByUserKeyDB(ukey)) select
+    var q_data = from db () in "splunkdata" where (SplunkHelper.queryBetweenTimespanDB(start, end), SplunkHelper.queryByUserKeyDB(ukey)) select
       SplunkHelper.querySplunkDBOToQueryObject(List[String]("search", "getListingById"))
 
     q_data.toList
@@ -63,15 +69,26 @@ class SplunkQueryResults {
   /**
    * Provide the function usage for each distinct function, in descending order.
    */
-  def getFunctionUsage(startDate: String, endDate: String, logSourceName: String) {
+  def getFunctionUsage(startDate: String, endDate: String, logSourceName: String) {    
+    var sumWithDateMap: TreeMap[String, Map[String, Int]] = TreeMap.empty
+    val queryData = from db () in "splunkdata" where (SplunkHelper.queryBetweenTimespanDB(getIntDays(startDate), getIntDays(endDate))) select
+      SplunkHelper.querySplunkDBOWithDays(List[String]("days", "search", "getByListingId"))
+    val distinctRecords = queryData.aggregate(
+      SplunkHelper.AggregateByProperty("days"),
+      SplunkHelper.AggregateSumSplunkData(List[String]("days","search", "getByListingId")))
+      .orderbyDecsending(x => { x.getProperty[Int]("search") })
 
-//    val queryData = from db () in "splunkdata" where (SplunkHelper.queryBetweenTimespanDB(getIntDays(startDate), getIntDays(endDate))) select
-//      (x => x)
-//    val distinctUsers = queryData.aggregate(
-//      SplunkHelper.AggregateByProperty("days"),
-//      SplunkHelper.AggregateSumSplunkData(y => {y.getProperty[Int]("search") }))
-//      .orderbyDecsending(x => { x.getProperty[Int]("search") })
-//    distinctUsers.toList.foreach(println)
+    for (record <- distinctRecords) {
+      var propMap: Map[String, Int] = Map.empty
+      var date: String = ""
+      record.args.foreach(x => {
+        println(x)
+        if (!(x.name).equals("days") && !((x.name).equals("key"))) propMap += (x.name -> (x.get).##)
+        else date = x.get.toString
+      })
+      sumWithDateMap += (date -> propMap)
+    }
+    sumWithDateMap.foreach(println)
   }
 
   def getIntDays(dateStr: String): Int = {
