@@ -98,7 +98,7 @@ class SplunkQueryResults {
     daysInRange
   }
 
-  def getQueryOccurances(queryStr: String, queryType: String): List[SensisQueryElement] = {
+  def getQueryOccurances(queryStr: String, queryType: String): Map[String, List[SensisQueryElement]]= {
 //  def getQueryOccurances(queryStr: String, queryType: String): JSONObject = {
     val qWords: Array[String] = queryStr.split(" ")
     var dataMap: Map[String, List[SensisQueryElement]] = Map.empty
@@ -117,6 +117,8 @@ class SplunkQueryResults {
 //    new JSONObject(dataMap)
     var reVal : List[SensisQueryElement] = Nil
     for (t <- dataMap) reVal = reVal ::: t._2
-    reVal
+    var m : Map[String, List[SensisQueryElement]] = Map.empty
+    m += ("items" -> reVal)
+    m
   }
 }
