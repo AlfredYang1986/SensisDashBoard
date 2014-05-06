@@ -1,10 +1,12 @@
 package query.helper.results
+
 import query.property.SensisQueryElement
 import query._
 import org.joda.time.Days
 import org.joda.time.DateTime
 import java.text.SimpleDateFormat
 import query.helper.SplunkHelper
+import com.mongodb.casbah.Imports.mongoQueryStatements
 
 /*
  * TODO: Stub class to handle splunk data collection.
@@ -66,5 +68,18 @@ class SplunkQueryResults {
     val givenDate = new SimpleDateFormat("dd/MMM/yyyy").parse(dateStr)
     val daysInRange: Int = Days.daysBetween(new DateTime(BaseTimeSpan.base), new DateTime(givenDate)).getDays()
     daysInRange
+  }
+
+  def getQueryOccurances(queryStr: String, queryType: String) {
+    val qWords: Array[String] = queryStr.split(" ")
+
+    for (word <- qWords) {
+      if (word != "") {
+        val queryData = from db () in "splunk_query_data" where (queryType.toLowerCase.trim $regex word.trim.toLowerCase) select
+          SplunkHelper.getSplunkQueriesToObject("query", "location", "occurances")
+
+        queryData.toList.foreach(println)
+      }
+    }
   }
 }

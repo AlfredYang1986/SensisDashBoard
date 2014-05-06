@@ -71,4 +71,18 @@ object SplunkHelper {
     }
     reVal
   }
+
+  /**
+   * Retrieve records from "splunk_query_data" and generate SensisQueryElement.
+   */
+  def getSplunkQueriesToObject(args: String*): MongoDBObject => SensisQueryElement = x => {
+    val reVal = new SensisQueryElement
+    for (it <- args) {
+      if (it != "occurances")
+        reVal.insertProperty(it, x.getAsOrElse(it, ""))
+      else
+        reVal.insertProperty(it, x.getAsOrElse(it, 0))
+    }
+    reVal
+  }
 }
