@@ -61,7 +61,10 @@ object AlfredSearchDemoForTony extends App {
 	
 	val query_001 = query_top.top(1)
 	var m1 : Map[String, Any] = Map.empty
-	query_001.toList.map(x => x.args.map(y => m1 += (y.name -> y.get)))
+	query_001.toList.map(x => x.args.map{y =>
+	  	if (y.name.contains("/")) m1 += (y.name.substring(y.name.indexOf('/')) -> y.get)
+	  	else m1 += (y.name -> y.get)
+	})
 	println(m1)
 	println(new JSONObject(m1))
 }
