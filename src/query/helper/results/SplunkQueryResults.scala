@@ -7,6 +7,8 @@ import org.joda.time.DateTime
 import java.text.SimpleDateFormat
 import query.helper.SplunkHelper
 import com.mongodb.casbah.Imports.mongoQueryStatements
+import scala.util.parsing.json.JSONObject
+import scala.util.parsing.json.JSONObject
 
 /*
  * TODO: Stub class to handle splunk data collection.
@@ -62,6 +64,7 @@ class SplunkQueryResults {
    * Provide the function usage for each distinct function, in descending order.
    */
   def getFunctionUsage(startDate: String, endDate: String, logSourceName: String) {
+
   }
 
   def getIntDays(dateStr: String): Int = {
@@ -70,16 +73,18 @@ class SplunkQueryResults {
     daysInRange
   }
 
-  def getQueryOccurances(queryStr: String, queryType: String) {
+  def getQueryOccurances(queryStr: String, queryType: String): JSONObject = {
     val qWords: Array[String] = queryStr.split(" ")
+    var dataMap: Map[String, List[SensisQueryElement]] = Map.empty
 
     for (word <- qWords) {
       if (word != "") {
         val queryData = from db () in "splunk_query_data" where (queryType.toLowerCase.trim $regex word.trim.toLowerCase) select
           SplunkHelper.getSplunkQueriesToObject("query", "location", "occurances")
 
-        queryData.toList.foreach(println)
+        dataMap += (word -> queryData.toList)
       }
     }
+    new JSONObject(dataMap)
   }
 }
