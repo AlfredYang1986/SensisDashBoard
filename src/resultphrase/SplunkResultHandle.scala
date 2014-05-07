@@ -100,29 +100,26 @@ object SplunkResultHandle extends ResultHandle {
 
     def getUserQuery(): String =
       argsMap.get("query") match {
-        case Some(e) => e
+        case Some(e) => {
+          val decodeResult: String = (java.net.URLDecoder.decode((e.toString()), "UTF-8")).trim.toLowerCase.toString
+          decodeResult
+        }
         case none => ""
       }
-
-    // Old school Regex matching for eliminating special characters.
-    val decodeResult: String = java.net.URLDecoder.decode((getUserQuery.toString()), "UTF-8")
-    var userQueries: Array[String] = Array.empty
-    val pattern: Pattern = Pattern.compile("\\W");
-    val matcher: Matcher = pattern.matcher(decodeResult)
-    if (matcher.find()) {
-      userQueries = (matcher.replaceAll(" ")).split(" ")
-    }
 
     def getLocation(): String =
       argsMap.get("location") match {
-        case Some(e) => e
+        case Some(e) => {
+          var location: String =
+            if (e.count(_ == '+') > 1)
+              (e.replaceFirst("\\+", " ").replace('+', ',').trim).toLowerCase.toString
+            else
+              (e.replace('+', ',').trim).toLowerCase.toString
+
+          location
+        }
         case none => ""
       }
-    var location = getLocation
-    if (location.count(_ == '+') > 1)
-      location = (location.replaceFirst("\\+", " ").replace('+', ',').trim).toLowerCase
-    else
-      location = (location.replace('+', ',').trim).toLowerCase
 
     def addQueryOccurance(left: MongoDBObject) = {
       val newDbObj = MongoDBObject.newBuilder
@@ -131,15 +128,12 @@ object SplunkResultHandle extends ResultHandle {
       (left ++ newDbObj.result)
     }
 
-    for (word <- userQueries) {
-      val queryWord = word.toString.trim.toLowerCase
+    val data = from db () in "splunk_query_data" where ("query" $eq getUserQuery.toString(), "location" $eq getLocation.toString) select (x => x)
+    if ((getUserQuery != "") && (data.empty))
+      _data_connection.getCollection("splunk_query_data") += MongoDBObject("query" -> getUserQuery.toString(), "location" -> getLocation.toString, "occurances" -> 1)
+    else if ((getUserQuery != "") && !(data.empty))
+      _data_connection.getCollection("splunk_query_data") update (data.fistOrDefault.get, addQueryOccurance(data.fistOrDefault.get))
 
-      val data = from db () in "splunk_query_data" where ("query" $eq queryWord, "location" $eq location) select (x => x)
-      if ((queryWord != "") && (data.empty))
-        _data_connection.getCollection("splunk_query_data") += MongoDBObject("query" -> queryWord, "location" -> location, "occurances" -> 1)
-      else if ((queryWord != "") && !(data.empty))
-        _data_connection.getCollection("splunk_query_data") update (data.fistOrDefault.get, addQueryOccurance(data.fistOrDefault.get))
-    }
-
+    println(getLocation)
   }
 }
