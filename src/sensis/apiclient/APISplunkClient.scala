@@ -35,6 +35,22 @@ object SplunkProxy extends APIProxy {
 		  case "month" => val cal = Calendar.getInstance(); cal.setTime(new Date()); cal.getTime
 		  case _ => throw Error_PhraseXML
 		}
+		
+		def HandleSplunkDate_safe(begin : Date, end : Date) : Unit = {
+			val s: String = "search earliest=\"" + date_format.format(begin) + "\" latest=\"" + date_format.format(end) + "\""
+			
+			try {
+				callback(IOUtils.toString(service.export(
+				    "search earliest=\"" + date_format.format(begin) + "\" latest=\"" + 
+				    date_format.format(end) + "\"")))
+			} catch {
+			  case ex : OutOfMemoryError => {
+				  val mid = new Date(begin.getTime() + (end.getTime() - begin.getTime()) / 2)
+				  HandleSplunkDate_safe(begin, mid)
+				  HandleSplunkDate_safe(mid, end)
+			  }
+			}
+		}
 	
 		def loopTimeSpan(st: Date, ed: Date) = {
 			def presentage(n: Date) : Double = (n.getTime() - st.getTime()) * 100.0 / (ed.getTime() - st.getTime())
@@ -43,14 +59,14 @@ object SplunkProxy extends APIProxy {
 			cal.setTime(st)
 			// get data minutes by minutes
 			var it_time = st.getTime()
+			var result : String = ""
 			while (it_time < ed.getTime()) {
+				result = ""
 				val begin = cal.getTime()
 				cal.add(Calendar.MINUTE, 1)
 				val end = cal.getTime()
 				println(presentage(end))
-				val s: String = "search earliest=\"" + date_format.format(begin) + "\" latest=\"" + date_format.format(end) + "\""
-				val result = IOUtils.toString(service.export(s))
-				callback(result)
+				HandleSplunkDate_safe(begin, end)
 				it_time = end.getTime()
 			}
 		}
