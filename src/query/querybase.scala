@@ -17,7 +17,7 @@ trait IQueryable {
 }
 
 class ALINQ[T] {
-	var w : (T) => Boolean = x => true
+	var w : T => Boolean = x => true
 	var ls : List[T] = Nil
   
 	def in(l: List[T]) : ALINQ[T] = {
@@ -25,12 +25,12 @@ class ALINQ[T] {
 		this
 	}
 
-	def where(f: (T) => Boolean) : ALINQ[T] = {
+	def where(f: T => Boolean) : ALINQ[T] = {
 		w = f
 		this
 	}
 	
-	def select[U](cr: (T) => U) : List[U] = {
+	def select[U](cr: T => U) : List[U] = {
 		for {
 			i <- ls
 			if (w(i))
