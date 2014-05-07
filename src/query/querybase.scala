@@ -8,12 +8,26 @@ package query
 import com.mongodb.casbah.Imports._
 import com.mongodb.casbah.query.dsl.QueryExpressionObject
 
-trait IQueryable {
+object _data_connection {
+//	def conn_name : String = "SensisSAPIdb"
 	def conn_name : String = "Alfred_Test"
+
+	val _conn = MongoConnection()
+	var _conntion : Map[String, MongoCollection] = Map.empty
+	
+	def getCollection(coll_name : String) : MongoCollection = {
+		if (!_conntion.contains(coll_name)) _conntion += (coll_name -> _conn(conn_name)(coll_name))
+		
+		_conntion.get(coll_name).get
+	}
+}
+
+trait IDatabaseContext {
 	var coll_name : String = null
 
-	private def openConnection : MongoCollection = MongoConnection()(conn_name)(coll_name)
-	private def closeConnection = null
+	protected def openConnection : MongoCollection = 
+	  	_data_connection._conn(_data_connection.conn_name)(coll_name)
+	protected def closeConnection = null
 }
 
 class ALINQ[T] {
@@ -30,11 +44,12 @@ class ALINQ[T] {
 		this
 	}
 	
-	def select[U](cr: T => U) : List[U] = {
-		for {
-			i <- ls
-			if (w(i))
-		} yield cr(i)
+	def select[U](cr: (T) => U) : IQueryable[U] = {
+		var nc = new Linq_List[U]
+		for (i <- ls) {
+			if (w(i)) nc = (nc :+ cr(i)).asInstanceOf[Linq_List[U]]
+		}
+		nc
 	}
 }
 
@@ -43,7 +58,7 @@ object from {
 	def db() : AMongoDBLINQ = new AMongoDBLINQ
 }
 
-class AMongoDBLINQ extends IQueryable {
+class AMongoDBLINQ extends IDatabaseContext {
 	var w : DBObject = null
   
 	def in(l: String) : AMongoDBLINQ = {
@@ -56,24 +71,20 @@ class AMongoDBLINQ extends IQueryable {
 		for (arg <- args) {
 			arg match {
 			  case a: (String, AnyRef) => w += a
-			  case a: DBObject => w ++ a
+			  case a: DBObject => w = w ++ a
 			}
 		}
 		this
 	}
 	
-	def select[U](cr: (MongoDBObject) => U) : List[U] = {
+	def select[U](cr: (MongoDBObject) => U) : IQueryable[U] = {
 	 
-		// Connecting to MongoDB
-		val mongoConn = MongoConnection()
-		// get DB
-		val mongoDB = mongoConn(conn_name)
-		// get DB collection or table
-		val mongoColl = mongoDB(coll_name)
-		
+		val mongoColl = openConnection
 		val ct = mongoColl.find(w).toList
-		for {
-			i <- ct
-		} yield cr(i)
+		var nc = new Linq_List[U]
+		for (i <- ct) {
+			nc = (nc :+ cr(i)).asInstanceOf[Linq_List[U]]
+		}
+		nc
 	}
 }

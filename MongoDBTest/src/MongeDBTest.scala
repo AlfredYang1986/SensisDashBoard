@@ -15,7 +15,7 @@ object mongodbTest extends App {
 	mongoColl += new_obj
 	new_obj = MongoDBObject("foo" -> "a", "x" -> 5, "y" -> 2.1)
 	mongoColl += new_obj
-	new_obj = MongoDBObject("foo" -> "b", "x" -> 5, "y" -> 23.1)
+	new_obj = MongoDBObject("foo" -> "b", "x" -> 2)
 	mongoColl += new_obj
 	new_obj = MongoDBObject("foo" -> "c", "x" -> 5, "y" -> 29.1)
 	mongoColl += new_obj

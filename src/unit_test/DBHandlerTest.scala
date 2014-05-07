@@ -17,9 +17,24 @@ object DBHandlerTest extends App {
   val dbh: DataHandlerFacade = new DataBaseHandler
   val dbh2: DataBaseHandler = new DataBaseHandler
 
-  dbh2.retriveUserCalls(new Date() , new Date(), "Splunk")
+  //dbh2.retriveUserCalls(new Date() , new Date(), "Splunk")
+
+  val s: String = "2014/04/28 03:12:10"
+  val d: Date = new Date(Date.parse(s))
+  val c: GregorianCalendar = new GregorianCalendar(d.getYear(), d.getMonth(), d.getDay())
+  println(d)
+  println((c.getTime().getTime())/(24*60*60*1000))
   
+//  dbh2.getTopTenUsers("2014/04/01 02:00:00", "2014/04/01 04:00:00", "Splunk")
   
+//  dbh2.getFunctionUsage("2014/04/01 02:00:00", "2014/04/01 04:00:00", "Splunk")
+  
+  //dbh2.getEachUserByKey("2014/04/01 02:00:00", "2014/04/01 04:00:00", "Splunk", "71da34f94aaae4d4d4d7b9d930b275d2")
+  
+//  dbh2.getDistinctUsers("2014/04/01 02:00:00", "2014/04/01 04:00:00", "Splunk")
+//  dbh2.getEachUserByKey("2014/04/01 02:00:00", "2014/04/01 04:00:00", "Splunk", "71da34f94aaae4d4d4d7b9d930b275d2")
+  dbh2.getAllDistinctUserKeys("2014/04/01 02:00:00", "2014/04/01 04:00:00", "Splunk")
+
   //  var lst: List[Int] = List.empty
   //  lst = 1 :: lst
   //  lst = 2 :: lst
