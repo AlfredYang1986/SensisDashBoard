@@ -8,8 +8,22 @@
 		</key>
 		<query factory="JOSN-RPC">
 			<arg type="String" name="method" value="object.query" />
-			<arg type="StringList" name="params" value="SELECT * FROM members PAGE %d" />
+			<arg type="StringList" name="params" value="SELECT * FROM members PAGE 2" />
 			<arg type="Int" name="id" value="1" />
 		</query>
 	</Service> 
+
+	<Service name="Splunk" url="http://localhost:8089" resultHandle="SplunkXML" >
+		<key factory="SplunkKey">
+			<arg name="username" value="admin" />
+			<arg name="password" value="Abcde196125" />
+			<arg name="host" value="localhost" />
+			<arg name="port" value="8089" />
+		</key>
+		
+		<query factory="SplunkApiQuery" >
+			<arg type="String" name="method" value="search" />
+			<arg type="String" name="duration" value="month" />
+		</query>
+	</Service>
 </Services>
