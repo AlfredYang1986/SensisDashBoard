@@ -46,8 +46,10 @@ object SplunkProxy extends APIProxy {
 			} catch {
 			  case ex : OutOfMemoryError => {
 				  val mid = new Date(begin.getTime() + (end.getTime() - begin.getTime()) / 2)
-				  HandleSplunkDate_safe(begin, mid)
-				  HandleSplunkDate_safe(mid, end)
+				  if (begin != mid) {
+					  HandleSplunkDate_safe(begin, mid)
+					  HandleSplunkDate_safe(mid, end)
+				  }
 			  }
 			}
 		}
