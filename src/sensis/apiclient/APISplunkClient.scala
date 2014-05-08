@@ -18,6 +18,8 @@ import sensis.APISplunkArguments
 import java.util.Calendar
 import java.text.SimpleDateFormat
 import java.util.Date
+import com.splunk.JobArgs
+import com.splunk.JobResultsPreviewArgs
 
 object SplunkProxy extends APIProxy {
 	override def request(url: String, key: APIKeyBase, args: APIArgumentsBase) = {
@@ -36,6 +38,36 @@ object SplunkProxy extends APIProxy {
 		  case _ => throw Error_PhraseXML
 		}
 		
+		def HandleSplunkDateWithJobs(begin : Date, end : Date) : Unit = {
+			println("Start")
+			val search = "search earliest=\"" + date_format.format(begin) + "\" latest=\"" + date_format.format(end) + "\""
+	  
+			// Create an argument 
+			val jobArgs = new JobArgs
+			jobArgs.setExecutionMode(JobArgs.ExecutionMode.NORMAL)
+	
+			// Create a Job
+			val job = service.search(search, jobArgs)
+			job.enablePreview()
+			job.update()
+	
+			while (!job.isReady()) Thread.sleep(500)
+	
+			var countBatch = 0;
+			while (!job.isDone()) {
+				countBatch = countBatch + 1
+				val previewargs = new JobResultsPreviewArgs 
+				previewargs.setCount(500) // Get 500 preview at a time
+				previewargs.setOutputMode(JobResultsPreviewArgs.OutputMode.XML)
+		
+				val results =  job.getResultsPreview(previewargs)
+		
+				println(IOUtils.toString(results))
+				println("Times: countBatch =  %d".format(countBatch))
+			}
+			println("End")
+		}
+		
 		def HandleSplunkDate_safe(begin : Date, end : Date) : Unit = {
 			val s: String = "search earliest=\"" + date_format.format(begin) + "\" latest=\"" + date_format.format(end) + "\""
 			
@@ -44,13 +76,7 @@ object SplunkProxy extends APIProxy {
 				    "search earliest=\"" + date_format.format(begin) + "\" latest=\"" + 
 				    date_format.format(end) + "\"")))
 			} catch {
-			  case ex : OutOfMemoryError => {
-				  val mid = new Date(begin.getTime() + (end.getTime() - begin.getTime()) / 2)
-				  if (begin != mid) {
-					  HandleSplunkDate_safe(begin, mid)
-					  HandleSplunkDate_safe(mid, end)
-				  }
-			  }
+			  case ex : OutOfMemoryError => HandleSplunkDateWithJobs(begin, end)
 			}
 		}
 	
