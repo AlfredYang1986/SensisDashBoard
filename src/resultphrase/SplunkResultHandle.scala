@@ -97,27 +97,19 @@ object SplunkResultHandle extends ResultHandle {
 
   /* save queries and enpoints to DB*/
   def addDistinctQueryAndLocation(argsMap: Map[String, String]) = {
-
+    
     def getUserQuery(): String =
       argsMap.get("query") match {
-        case Some(e) => {
-          val decodeResult: String = (java.net.URLDecoder.decode((e.toString()), "UTF-8")).trim.toLowerCase.toString
-          decodeResult
-        }
+//        case Some(e) => (java.net.URLDecoder.decode((e.toString()), "UTF-8")).trim.toLowerCase.toString
+        case Some(e) => URLArgDecoding.decoding(e.toString())
         case none => ""
       }
 
     def getLocation(): String =
       argsMap.get("location") match {
-        case Some(e) => {
-          var location: String =
-            if (e.count(_ == '+') > 1)
-              (e.replaceFirst("\\+", " ").replace('+', ',').trim).toLowerCase.toString
-            else
-              (e.replace('+', ',').trim).toLowerCase.toString
-
-          location
-        }
+        case Some(e) => 
+            if (e.count(_ == '+') > 1) (e.replaceFirst("\\+", " ").replace('+', ',').trim).toLowerCase.toString
+            else (e.replace('+', ',').trim).toLowerCase.toString
         case none => ""
       }
 
@@ -133,7 +125,5 @@ object SplunkResultHandle extends ResultHandle {
       _data_connection.getCollection("splunk_query_data") += MongoDBObject("query" -> getUserQuery.toString(), "location" -> getLocation.toString, "occurances" -> 1)
     else if ((getUserQuery != "") && !(data.empty))
       _data_connection.getCollection("splunk_query_data") update (data.fistOrDefault.get, addQueryOccurance(data.fistOrDefault.get))
-
-    println(getLocation)
   }
 }
