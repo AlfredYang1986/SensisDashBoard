@@ -19,13 +19,12 @@ object URLArgDecoding {
 				  case Some(e) => reVal.append(e.asInstanceOf[Char]); index = 3 + index
 				  case none => ;
 				}
-			} else reVal.append(input.charAt(index)); index = 1 + index
+			} else if (input.charAt(index) == '+') reVal.append(' ')
+			else reVal.append(input.charAt(index)); index = 1 + index
 		}
-		println(reVal)
 		reVal.toString
 	}
 
-	private val pattern = "\\w"
 	private val _level : Map[String, Char] = Map(
 	    ("%20" -> ' '), ("%21" -> '!'), ("%22" -> '"'),
 	    ("%23" -> '#'), ("%24" -> '$'), ("%25" -> '%'),
