@@ -1,5 +1,0 @@
-package login
-
-class SysAdministrators {
-
-}

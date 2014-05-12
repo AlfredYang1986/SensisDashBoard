@@ -5,18 +5,38 @@ import query.helper._
 import com.mongodb.casbah.Imports._
 import com.mongodb.casbah.query.dsl.QueryExpressionObject
 
-object UserLogin {
-	def loadInitialAdminstrators(path : String) = {
-		val Pete   = MongoDBObject("username" -> "Pete", "password" -> "***")
-		val Andrew = MongoDBObject("username" -> "Andrew", "password" -> "***")
-		val Karl   = MongoDBObject("username" -> "Karl", "password" -> "***")
-		val Willy  = MongoDBObject("username" -> "Willy", "password" -> "***")
-		
-		if (from db() in "user_login" where Pete )
-	}
+case class Admin(username : String, password : String)
 
-	def authorization(username : String, password : String) : Boolean = false
-	def addAdminstrators(username : String, password : String) = {}
-	def deleteAdministrators(username : String) = {}
-	def changePassword(username : String, password : String) = {}
+object UserLogin {
+	def loginAsInitialAdmin(username : String, password : String) : Boolean = 
+		// 1. the origin password is 8888
+		// 2. username must be Pete, Andrew, Karl, Willy
+		if ("8888" == password && List("Pete", "Andrew", "Karl", "Willy").contains(username)) {
+			_data_connection.getCollection("user_name") += MongoDBObject("username" -> username, "password" -> "8888")
+			true
+		} else false
+	
+	def authorization(username : String, password : String) : Boolean = 
+		if (from db() in "user_name" where ("username" -> username, "password" -> password) contains) true
+		else loginAsInitialAdmin(username, password)
+
+	def addAdmin(username : String, password : String) : Boolean = 
+		if (from db() in "user_name" where ("username" -> username) contains) false
+		else {
+		  _data_connection.getCollection("user_name") += MongoDBObject("username" -> username, "password" -> password)
+		  true
+		}
+	
+	def deleteAdmin(username : String) : Boolean = 
+		(from db() in "user_name" where ("username" -> username) select (x => x)).fistOrDefault match {
+		  case Some(e) => _data_connection.getCollection("user_name") -= e; true
+		  case none => false
+		}
+	
+	def changePassword(username : String, password : String) : Boolean =
+		(from db() in "user_name" where ("username" -> username) select (x => x)).fistOrDefault match {
+		  case Some(e) => _data_connection.getCollection("user_name").update(e, ("password" $eq password)); true
+		  case none => false
+		}
 }
+
