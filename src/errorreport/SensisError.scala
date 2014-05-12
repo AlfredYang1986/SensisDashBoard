@@ -37,3 +37,9 @@ object Error_PhraseXML extends SensisError {
 	def message = "Phrase XML Error"
 	def description = ""
 }
+
+object Error_ArgumentNotFound extends SensisError {
+	def code = -5
+	def message = "Required Function Argument Not Found"
+	def description = ""
+}

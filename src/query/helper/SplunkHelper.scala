@@ -78,7 +78,7 @@ object SplunkHelper {
   def getSplunkQueriesToObject(args: String*): MongoDBObject => SensisQueryElement = x => {
     val reVal = new SensisQueryElement
     for (it <- args) {
-      if (it != "occurances")
+      if (it != "occurances" && it != "days")
         reVal.insertProperty(it, x.getAsOrElse(it, ""))
       else
         reVal.insertProperty(it, x.getAsOrElse(it, 0))
@@ -90,11 +90,28 @@ object SplunkHelper {
    * User information with the "days"
    */
   def querySplunkDBOWithDays(args: List[String]): MongoDBObject => SensisQueryElement = x => {
-    val reVal = new SensisQueryElement    
+    val reVal = new SensisQueryElement
     reVal.insertProperty("key", x.getAs[String]("key").get)
     for (it <- args) {
       if (it != "key")
         reVal.insertProperty(it, x.getAsOrElse(it, 0))
+    }
+    reVal
+  }
+
+  /**
+   * Sum function to get aggregation of non-Key collections
+   */
+  def AggregateSumQueryData(args: String*): List[SensisQueryElement] => SensisQueryElement = ls => {
+    val reVal = new SensisQueryElement
+        
+    for (it <- ls){ //search = search + it.getProperty[Int]("search") 
+      reVal.insertProperty("query", it.getProperty[String]("query"))
+      reVal.insertProperty("location", it.getProperty[String]("location"))
+      for (arg <- args) {
+        if (arg != "query" && arg != "location")
+          reVal.insertProperty(arg, reVal.getProperty[Int](arg) + it.getProperty[Int](arg))
+      }
     }
     reVal
   }

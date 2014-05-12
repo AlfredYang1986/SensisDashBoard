@@ -1,19 +1,21 @@
 package query.helper.results
 
 import java.text.SimpleDateFormat
+
 import scala.collection.immutable.Map
 import scala.collection.immutable.TreeMap
-import scala.util.parsing.json.JSONObject
+
 import org.joda.time.DateTime
 import org.joda.time.Days
+
+import com.mongodb.casbah.Imports.IntDoNOk
 import com.mongodb.casbah.Imports.mongoQueryStatements
+
+import errorreport.Error_ArgumentNotFound
 import query.BaseTimeSpan
 import query.from
 import query.helper.SplunkHelper
 import query.property.SensisQueryElement
-import errorreport.Error_Common
-import query._
-import com.mongodb.casbah.Imports._
 
 /*
  * TODO: Stub class to handle splunk data collection.
@@ -90,6 +92,9 @@ class SplunkQueryResults {
     sumWithDateMap.foreach(println)
   }
 
+  /**
+   * Returns the number of days available from base, to the given date string.
+   */
   def getIntDays(dateStr: String): Int = {
     var givenDate = new SimpleDateFormat("dd-MM-yyyy").parse(dateStr)
     givenDate = new SimpleDateFormat("dd/MMM/yyyy").parse(new SimpleDateFormat("dd/MMM/yyyy").format(givenDate))
@@ -97,40 +102,24 @@ class SplunkQueryResults {
     daysInRange
   }
 
-  //  def getQueryOccurances(queryStr: String, queryType: String): Map[String, List[SensisQueryElement]]= {
-  ////  def getQueryOccurances(queryStr: String, queryType: String): JSONObject = {
-  //    val qWords: Array[String] = queryStr.split(" ")
-  //    var dataMap: Map[String, List[SensisQueryElement]] = Map.empty
-  //
-  //    for (word <- qWords) {
-  //      if (word != "") {
-  //        val queryData = from db () in "splunk_query_data" where (
-  //          if ((queryType.toLowerCase.trim).equals("query"))
-  //            queryType.toLowerCase.trim $eq word.trim.toLowerCase
-  //          else
-  //            queryType.toLowerCase.trim $regex word.trim.toLowerCase) select SplunkHelper.getSplunkQueriesToObject("query", "location", "occurances")
-  //
-  //        dataMap += (word -> queryData.toList)
-  //      }
-  //    }
-  ////    new JSONObject(dataMap)
-  //    var reVal : List[SensisQueryElement] = Nil
-  //    for (t <- dataMap) reVal = reVal ::: t._2
-  //    var m : Map[String, List[SensisQueryElement]] = Map.empty
-  //    m += ("items" -> reVal)
-  //    m
-  //  }
-
-  def getQueryOccurances(queryStr: String, start: String, end: String): List[SensisQueryElement] = {
+  /**
+   * Retrieves the query occurrences for the given date range. (Each query occurrence per location)
+   */
+  def getQueryOccurances(start: String, end: String): List[SensisQueryElement] = {
     val queryData = start match {
       case e: String => {
         if (end != null)
-          from db () in "splunk_query_data" where (SplunkHelper.queryBetweenTimespanDB(getIntDays(start), getIntDays(end)), "query" $eq queryStr.trim.toLowerCase.toString) select SplunkHelper.getSplunkQueriesToObject("query", "location", "occurances")
+          from db () in "splunk_query_data" where (SplunkHelper.queryBetweenTimespanDB(getIntDays(start), getIntDays(end))) select SplunkHelper.getSplunkQueriesToObject("query", "location", "occurances")
         else
-          from db () in "splunk_query_data" where ("days" $eq getIntDays(start), "query" $eq queryStr.trim.toLowerCase.toString) select SplunkHelper.getSplunkQueriesToObject("query", "location", "occurances")
+          from db () in "splunk_query_data" where ("days" $eq getIntDays(start)) select SplunkHelper.getSplunkQueriesToObject("query", "location", "occurances")
       }
-      case none => throw Error_Common
+      case none => throw Error_ArgumentNotFound
     }
-    queryData.toList
+    val distinctQueries = queryData.aggregate(
+      SplunkHelper.AggregateByProperty("query"),
+      SplunkHelper.AggregateSumQueryData("occurances")).orderby(x => { x.getProperty[String]("query") }).top(100)
+
+    distinctQueries.toList
   }
+
 }
