@@ -5,12 +5,8 @@ import java.text.SimpleDateFormat
 import scala.collection.immutable.Map
 import scala.collection.immutable.TreeMap
 import scala.util.parsing.json.JSONObject
-
-import org.joda.time.DateTime
-import org.joda.time.Days
-
 import com.mongodb.casbah.Imports.mongoQueryStatements
-
+import com.mongodb.casbah.Imports.IntDoNOk
 import query.BaseTimeSpan
 import query.from
 import query.helper.SplunkHelper
@@ -91,6 +87,9 @@ class SplunkQueryResults {
     sumWithDateMap.foreach(println)
   }
 
+  /**
+   * Returns the number of days available from base, to the given date string.
+   */
   def getIntDays(dateStr: String): Int = {
     var givenDate = new SimpleDateFormat("dd-MM-yyyy").parse(dateStr)
     givenDate = new SimpleDateFormat("dd/MMM/yyyy").parse(new SimpleDateFormat("dd/MMM/yyyy").format(givenDate))
