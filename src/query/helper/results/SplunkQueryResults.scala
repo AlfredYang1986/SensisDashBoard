@@ -1,7 +1,6 @@
 package query.helper.results
 
 import java.text.SimpleDateFormat
-
 import scala.collection.immutable.Map
 import scala.collection.immutable.TreeMap
 import scala.util.parsing.json.JSONObject
@@ -11,6 +10,8 @@ import query.BaseTimeSpan
 import query.from
 import query.helper.SplunkHelper
 import query.property.SensisQueryElement
+import org.joda.time.Days
+import org.joda.time.DateTime
 
 /*
  * TODO: Stub class to handle splunk data collection.
