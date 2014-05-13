@@ -51,6 +51,13 @@ class ALINQ[T] {
 		}
 		nc
 	}
+	
+	def contains : Boolean = {
+		for (i <- ls) {
+			if (w(i)) true
+		}
+		false
+	}
 }
 
 object from {
@@ -86,5 +93,10 @@ class AMongoDBLINQ extends IDatabaseContext {
 			nc = (nc :+ cr(i)).asInstanceOf[Linq_List[U]]
 		}
 		nc
+	}
+
+	def contains : Boolean = {
+		val mongoColl = openConnection
+		!mongoColl.findOne.isEmpty
 	}
 }

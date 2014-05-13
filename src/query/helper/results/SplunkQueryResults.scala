@@ -1,19 +1,20 @@
 package query.helper.results
 
 import java.text.SimpleDateFormat
+
 import scala.collection.immutable.Map
 import scala.collection.immutable.TreeMap
 import scala.util.parsing.json.JSONObject
+
 import org.joda.time.DateTime
 import org.joda.time.Days
+
 import com.mongodb.casbah.Imports.mongoQueryStatements
+
 import query.BaseTimeSpan
 import query.from
 import query.helper.SplunkHelper
 import query.property.SensisQueryElement
-import errorreport.Error_Common
-import query._
-import com.mongodb.casbah.Imports._
 
 /*
  * TODO: Stub class to handle splunk data collection.
@@ -68,13 +69,13 @@ class SplunkQueryResults {
   /**
    * Provide the function usage for each distinct function, in descending order.
    */
-  def getFunctionUsage(startDate: String, endDate: String, logSourceName: String) {
+  def getFunctionUsage(startDate: String, endDate: String, logSourceName: String) {    
     var sumWithDateMap: TreeMap[String, Map[String, Int]] = TreeMap.empty
     val queryData = from db () in "splunkdata" where (SplunkHelper.queryBetweenTimespanDB(getIntDays(startDate), getIntDays(endDate))) select
       SplunkHelper.querySplunkDBOWithDays(List[String]("days", "search", "getByListingId"))
     val distinctRecords = queryData.aggregate(
       SplunkHelper.AggregateByProperty("days"),
-      SplunkHelper.AggregateSumSplunkData(List[String]("days", "search", "getByListingId")))
+      SplunkHelper.AggregateSumSplunkData(List[String]("days","search", "getByListingId")))
       .orderbyDecsending(x => { x.getProperty[Int]("search") })
 
     for (record <- distinctRecords) {
@@ -97,40 +98,27 @@ class SplunkQueryResults {
     daysInRange
   }
 
-  //  def getQueryOccurances(queryStr: String, queryType: String): Map[String, List[SensisQueryElement]]= {
-  ////  def getQueryOccurances(queryStr: String, queryType: String): JSONObject = {
-  //    val qWords: Array[String] = queryStr.split(" ")
-  //    var dataMap: Map[String, List[SensisQueryElement]] = Map.empty
-  //
-  //    for (word <- qWords) {
-  //      if (word != "") {
-  //        val queryData = from db () in "splunk_query_data" where (
-  //          if ((queryType.toLowerCase.trim).equals("query"))
-  //            queryType.toLowerCase.trim $eq word.trim.toLowerCase
-  //          else
-  //            queryType.toLowerCase.trim $regex word.trim.toLowerCase) select SplunkHelper.getSplunkQueriesToObject("query", "location", "occurances")
-  //
-  //        dataMap += (word -> queryData.toList)
-  //      }
-  //    }
-  ////    new JSONObject(dataMap)
-  //    var reVal : List[SensisQueryElement] = Nil
-  //    for (t <- dataMap) reVal = reVal ::: t._2
-  //    var m : Map[String, List[SensisQueryElement]] = Map.empty
-  //    m += ("items" -> reVal)
-  //    m
-  //  }
+  def getQueryOccurances(queryStr: String, queryType: String): Map[String, List[SensisQueryElement]]= {
+//  def getQueryOccurances(queryStr: String, queryType: String): JSONObject = {
+    val qWords: Array[String] = queryStr.split(" ")
+    var dataMap: Map[String, List[SensisQueryElement]] = Map.empty
 
-  def getQueryOccurances(queryStr: String, start: String, end: String): List[SensisQueryElement] = {
-    val queryData = start match {
-      case e: String => {
-        if (end != null)
-          from db () in "splunk_query_data" where (SplunkHelper.queryBetweenTimespanDB(getIntDays(start), getIntDays(end)), "query" $eq queryStr.trim.toLowerCase.toString) select SplunkHelper.getSplunkQueriesToObject("query", "location", "occurances")
-        else
-          from db () in "splunk_query_data" where ("days" $eq getIntDays(start), "query" $eq queryStr.trim.toLowerCase.toString) select SplunkHelper.getSplunkQueriesToObject("query", "location", "occurances")
+    for (word <- qWords) {
+      if (word != "") {
+        val queryData = from db () in "splunk_query_data" where (
+          if ((queryType.toLowerCase.trim).equals("query"))
+            queryType.toLowerCase.trim $eq word.trim.toLowerCase
+          else
+            queryType.toLowerCase.trim $regex word.trim.toLowerCase) select SplunkHelper.getSplunkQueriesToObject("query", "location", "occurances")
+
+        dataMap += (word -> queryData.toList)
       }
-      case none => throw Error_Common
     }
-    queryData.toList
+//    new JSONObject(dataMap)
+    var reVal : List[SensisQueryElement] = Nil
+    for (t <- dataMap) reVal = reVal ::: t._2
+    var m : Map[String, List[SensisQueryElement]] = Map.empty
+    m += ("items" -> reVal)
+    m
   }
 }
