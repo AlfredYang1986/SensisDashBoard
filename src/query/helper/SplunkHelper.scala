@@ -2,6 +2,7 @@ package query.helper
 
 import query.property.SensisQueryElement
 import com.mongodb.casbah.Imports._
+import query.IQueryable
 
 object SplunkHelper {
   def queryByUserKey(key: String): SensisQueryElement => Boolean = x => key == x.getProperty("key")
@@ -40,7 +41,7 @@ object SplunkHelper {
   /**
    * Overloaded method to accept a list of String column names (end-point names)
    */
-  def AggregateSumSplunkData(args: List[String]): List[SensisQueryElement] => SensisQueryElement = ls => {
+  def AggregateSumSplunkData(args: IQueryable[String]): List[SensisQueryElement] => SensisQueryElement = ls => {
     val reVal = new SensisQueryElement
     reVal.insertProperty("key", ls.head.getProperty("key"))
     for (it <- ls) //search = search + it.getProperty[Int]("search") 
@@ -62,7 +63,7 @@ object SplunkHelper {
   /**
    * Overloaded method to accept a list of String column names (end-point names)
    */
-  def querySplunkDBOToQueryObject(args: List[String]): MongoDBObject => SensisQueryElement = x => {
+  def querySplunkDBOToQueryObject(args: IQueryable[String]): MongoDBObject => SensisQueryElement = x => {
     val reVal = new SensisQueryElement
     reVal.insertProperty("key", x.getAs[String]("key").get)
     for (it <- args) {
@@ -89,7 +90,7 @@ object SplunkHelper {
   /**
    * User information with the "days"
    */
-  def querySplunkDBOWithDays(args: List[String]): MongoDBObject => SensisQueryElement = x => {
+  def querySplunkDBOWithDays(args: IQueryable[String]): MongoDBObject => SensisQueryElement = x => {
     val reVal = new SensisQueryElement
     reVal.insertProperty("key", x.getAs[String]("key").get)
     for (it <- args) {
@@ -104,14 +105,28 @@ object SplunkHelper {
    */
   def AggregateSumQueryData(args: String*): List[SensisQueryElement] => SensisQueryElement = ls => {
     val reVal = new SensisQueryElement
-        
-    for (it <- ls){ //search = search + it.getProperty[Int]("search") 
+
+    for (it <- ls) { //search = search + it.getProperty[Int]("search") 
       reVal.insertProperty("query", it.getProperty[String]("query"))
       reVal.insertProperty("location", it.getProperty[String]("location"))
       for (arg <- args) {
         if (arg != "query" && arg != "location")
           reVal.insertProperty(arg, reVal.getProperty[Int](arg) + it.getProperty[Int](arg))
       }
+    }
+    reVal
+  }
+
+  /**
+   * 
+   */
+  def AggregateSumEndPointData(args: IQueryable[String]): List[SensisQueryElement] => SensisQueryElement = ls => {
+    val reVal = new SensisQueryElement
+
+    for (it <- ls) { //search = search + it.getProperty[Int]("search") 
+      reVal.insertProperty("days", it.getProperty[String]("days"))
+      for (arg <- args)
+        reVal.insertProperty(arg, reVal.getProperty[Int](arg) + it.getProperty[Int](arg))
     }
     reVal
   }
