@@ -98,12 +98,14 @@ object SplunkProxy extends APIProxy {
 				it_time = end.getTime()
 			}
 		}
-		
+
+		callback("start")
 		key match {
 		  case SplunkKey => 
 			val duration = args.asInstanceOf[APISplunkArguments].args.get("duration")
 			.get.asInstanceOf[String];loopTimeSpan(getStartDate(duration), getEndDate(duration))
 		  case _ => throw Error_PhraseXML
 		}
+		callback("end")
 	}
 }

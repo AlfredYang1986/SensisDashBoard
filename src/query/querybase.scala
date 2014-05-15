@@ -96,7 +96,6 @@ class AMongoDBLINQ extends IDatabaseContext {
 	}
 
 	def contains : Boolean = {
-		val mongoColl = openConnection
-		!mongoColl.findOne.isEmpty
+		!(select (x => x).empty)
 	}
 }
