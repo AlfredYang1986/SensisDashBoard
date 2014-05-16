@@ -9,8 +9,8 @@ import com.mongodb.casbah.Imports._
 import com.mongodb.casbah.query.dsl.QueryExpressionObject
 
 object _data_connection {
-//	def conn_name : String = "SensisSAPIdb"
-	def conn_name : String = "Alfred_Test"
+	def conn_name : String = "SensisSAPIdb"
+//	def conn_name : String = "Alfred_Test"
 
 	val _conn = MongoConnection()
 	var _conntion : Map[String, MongoCollection] = Map.empty
@@ -87,7 +87,7 @@ class AMongoDBLINQ extends IDatabaseContext {
 	def select[U](cr: (MongoDBObject) => U) : IQueryable[U] = {
 	 
 		val mongoColl = openConnection
-		val ct = mongoColl.find(w).toList
+		val ct = mongoColl.find(w)
 		var nc = new Linq_List[U]
 		for (i <- ct) {
 			nc = (nc :+ cr(i)).asInstanceOf[Linq_List[U]]
@@ -97,5 +97,15 @@ class AMongoDBLINQ extends IDatabaseContext {
 
 	def contains : Boolean = {
 		!(select (x => x).empty)
+	}
+	
+	def selectTop[U](n : Int)(o : String)(cr : (MongoDBObject) => U) : IQueryable[U] = {
+		val mongoColl = openConnection
+		val ct = mongoColl.find(w).sort(MongoDBObject(o -> -1)).limit(n)
+		var nc = new Linq_List[U]
+		for (i <- ct) {
+			nc = (nc :+ cr(i)).asInstanceOf[Linq_List[U]]
+		}
+		nc
 	}
 }

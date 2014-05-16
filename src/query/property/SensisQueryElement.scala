@@ -31,4 +31,6 @@ class SensisQueryElement {
 	  	for (arg <- args) mp += (arg.name -> arg.get)
 	  	new JSONObject(mp)
 	}
+	
+	def foreach[B](f : Property => B) = args foreach f
 }

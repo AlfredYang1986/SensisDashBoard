@@ -32,6 +32,8 @@ trait IQueryable[T] extends IEnumerable {
 	def foreach[U](body : (T) => U) : Unit
 	def toList : List[T]
 	def toString : String
+	
+	def union[U](that : IQueryable[T])(g : T => U)(f : (T, T) => T) : IQueryable[T]
 }
 
 class Linq_List[T] extends IQueryable[T] {
@@ -113,4 +115,24 @@ class Linq_List[T] extends IQueryable[T] {
 	def toList : List[T] = coll
 
 	override def toString = coll.toString
+	
+	def union[U](that : IQueryable[T])(g : T => U)(f : (T, T) => T) : IQueryable[T] = {
+		val nc = new Linq_List[T]
+		var ncoll : List[T] = Nil//new Linq_List[T]
+		
+		val dis_1 = (from[T] in coll select (g)).toList.distinct //union (from[T] in that.toList select (g)).toList.distinct
+		val dis_2 = (from[T] in that.toList select (g)).toList.distinct
+		val dis = dis_1 union dis_2
+		for (it <- dis) {
+			val l = (from[T] in coll where (x => g(x) == it) select (x => x)).fistOrDefault
+			val r = (from[T] in that.toList where (x => g(x) == it) select (x => x)).fistOrDefault
+	
+			if (l.isEmpty && r.isEmpty) ncoll = ncoll
+			else if (l.isEmpty) ncoll = ncoll :+ r.get
+			else if (r.isEmpty) ncoll = ncoll :+ l.get
+			else ncoll = ncoll :+ f(l.get, r.get)
+		}
+		nc.coll = ncoll
+		nc
+	}
 }
