@@ -1,15 +1,9 @@
-/**
- * one day data insert once
- * Created by Alfred Yang
- * 14th May, 2014
- */
-
 package cache
 
 import com.mongodb.casbah.Imports._
 import query._
 
-object SplunkRawDataCache extends SplunkCache{
+object SplunkRawYelloDataCache extends SplunkCache{
 	val impl = new SplunkRawDataCacheImpl
 	def initCache = clearCache
 	def clearCache = impl.clearCache
@@ -20,7 +14,7 @@ object SplunkRawDataCache extends SplunkCache{
 			var it = impl.data.iterator
 			while (it.hasNext) {
 				val (key, value) = it.next
-				_data_connection.getCollection(database) += (MongoDBObject("days" -> impl.days, "key" -> key, "yello" -> false) ++ value)
+				_data_connection.getCollection(database) += (MongoDBObject("days" -> impl.days, "key" -> key, "yello" -> true) ++ value)
 			}
 		}
 	}

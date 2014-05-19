@@ -52,11 +52,20 @@ object AlfredMasheryDataForTony extends App {
 //	println(query_7)
 //	println(query_8)
 
-	val query_0 = SplunkQuery.query(10298, 10305, new SensisQueryElement, "search")
+	val a = new SensisQueryElement
+	a.insertProperty("yello", true)
+	val b = new SensisQueryElement
+	b.insertProperty("yello", false)
+	val query_a = SplunkQuery.query(10298, 10305, a, "search", "getByListingId")
+	val query_b = SplunkQuery.query(10298, 10305, b, "search", "getByListingId")
+	println(query_a)
+	println(query_b)
+	
+	
+	val query_0 = SplunkQuery.query(10298, 10305, new SensisQueryElement, "search", "getByListingId")
 	val query_1 = SplunkQuery.query(10298, 10305, new SensisQueryElement, "*")
 	println(query_0)
 	println(query_1)
-	
 	
 	val query_2 = SplunkQLQuery.queryTops(100, 10298, 10305, new SensisQueryElement, "*")
 	println(query_2)

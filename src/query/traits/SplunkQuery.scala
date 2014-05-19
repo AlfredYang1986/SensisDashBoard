@@ -56,14 +56,19 @@ object SplunkQuery extends QueryTraits {
 	  		val l2 = from[String] in l.toList where (x => !x.contains("/")) select (x => x)
 	  		fl = l2.toList.toArray
 	  	} else fl = r.toArray
+	  
+	  	def getOneDayResult(di : Int) : IQueryable[SensisQueryElement] = {
+	  		val cur = SplunkDatabaseName.splunk_raw_data.format(di)
+	  		if (p.contains("yello")) from db() in cur where queryConditions select resultConditons(fl)
+	  		else {
+	  			val tmp1 = from db() in cur where queryConditions ++ ("yello" -> true) select resultConditons(fl)
+	  			val tmp2 = from db() in cur where queryConditions ++ ("yello" -> false) select resultConditons(fl)
+	  			unionResult(tmp1, tmp2, fl)
+	  		}
+	  	}
 	  	
 	  	var query : IQueryable[SensisQueryElement] = null
-	  	for (i <- b to e) {
-	  		val cur = SplunkDatabaseName.splunk_raw_data.format(i)
-	  		val tmp = from db() in cur where queryConditions select resultConditons(fl)
-	  		
-	  		query = unionResult(query, tmp, fl)
-	  	}
+	  	for (i <- b to e) query = unionResult(query, getOneDayResult(i), fl)
 	  	query
 	}
 }

@@ -1,10 +1,11 @@
 package cache
 
 class SplunkCacheFacade {
-	private def all = List("raw", "endpoint", "query")
+	private def all = List("raw", "raw_yello", "endpoint", "query")
   
 	def apply(name : String) : SplunkCache = name match {
 	  case "raw" => SplunkRawDataCache
+	  case "raw_yello" => SplunkRawYelloDataCache
 	  case "endpoint" => SplunkEndPointCache
 	  case "query" => SplunkQueryLocationCache
 	  case _ => ???

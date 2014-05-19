@@ -22,7 +22,7 @@ class SensisQueryElement {
 	}
 	
 	def contains(name : String) : Boolean = 
-		((from[Property] in args where (x => x.name == name) select (x => x)).fistOrDefault).isEmpty
+		!((from[Property] in args where (x => x.name == name) select (x => x)).fistOrDefault).isEmpty
 	
 	override def toString = args.toString
 	
@@ -33,4 +33,5 @@ class SensisQueryElement {
 	}
 	
 	def foreach[B](f : Property => B) = args foreach f
+	def clear = args = Nil
 }
