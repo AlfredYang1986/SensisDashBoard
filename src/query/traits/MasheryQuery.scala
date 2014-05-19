@@ -16,13 +16,13 @@ object MasheryQuery extends QueryTraits {
   def isQueryable(property: String): Boolean = false
 
   def query(b: Int, e: Int, p: SensisQueryElement, r: String*): JSONObject = {
-    new JSONObject(queryBase(b, e, p, r.toString))
+    new JSONObject(queryBase(b, e, p, r.toArray))
   }
 
   def queryCount(b: Int, e: Int, p: SensisQueryElement, r: String*): JSONObject = {
     var countMap: TreeMap[String, Int] = TreeMap.empty
 
-    (queryBase(b, e, p, r.toString)).foreach(x => {
+    (queryBase(b, e, p, r.toArray)).foreach(x => {
       countMap += (x._1 -> (x._2).size)
     })
     new JSONObject(countMap)
@@ -30,7 +30,7 @@ object MasheryQuery extends QueryTraits {
 
   def queryTops(t: Int, b: Int, e: Int, p: SensisQueryElement, r: String*): JSONObject = ???
 
-  def queryBase(start: Int, end: Int, conditions: SensisQueryElement, req: String*): Map[String, List[SensisQueryElement]] = {
+  def queryBase(start: Int, end: Int, conditions: SensisQueryElement, req: Array[String]): Map[String, List[SensisQueryElement]] = {
 
     def queryConditions: DBObject = {
       val dbObjectBuilder = MongoDBObject.newBuilder
