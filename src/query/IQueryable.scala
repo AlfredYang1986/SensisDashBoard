@@ -122,7 +122,7 @@ class Linq_List[T] extends IQueryable[T] {
 		
 		val dis_1 = (from[T] in coll select (g)).toList.distinct //union (from[T] in that.toList select (g)).toList.distinct
 		val dis_2 = (from[T] in that.toList select (g)).toList.distinct
-		val dis = dis_1 union dis_2
+		val dis = (dis_1 union dis_2).distinct
 		for (it <- dis) {
 			val l = (from[T] in coll where (x => g(x) == it) select (x => x)).fistOrDefault
 			val r = (from[T] in that.toList where (x => g(x) == it) select (x => x)).fistOrDefault

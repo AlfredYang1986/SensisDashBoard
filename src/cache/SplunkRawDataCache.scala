@@ -10,7 +10,7 @@ import com.mongodb.casbah.Imports._
 import query._
 
 object SplunkRawDataCache extends SplunkCache{
-	val impl = new SplunkRawDataCacheImpl
+	val impl = new SplunkRawDataCacheImpl( () => synchonaizeCache )
 	def initCache = clearCache
 	def clearCache = impl.clearCache
 	def synchonaizeCache = {

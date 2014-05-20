@@ -3,13 +3,13 @@ package cache
 import com.mongodb.casbah.Imports._
 import query._
 
-class SplunkRawDataCacheImpl extends SplunkCache {
+class SplunkRawDataCacheImpl(sy : () => Unit) extends SplunkCache {
 	var days : Int = 0
 	var data = Map.empty[String, DBObject]
 
 	def initCache = clearCache
 	def clearCache = data = Map.empty[String, DBObject]
-	def synchonaizeCache = ???
+	def synchonaizeCache = sy()
 
 	def isClean = data.isEmpty
 	def addRecord(d : Int, k : String, m : String) = {

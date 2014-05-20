@@ -22,7 +22,8 @@ object SplunkQueryLocationCache extends SplunkCache {
 			var it = ql.iterator
 			while (it.hasNext) {
 				val (key, value) = it.next
-				_data_connection.getCollection(database) += (MongoDBObject("days" -> days) ++ value)
+				if (value.getAsOrElse("times", 0) > 5)
+					_data_connection.getCollection(database) += (MongoDBObject("days" -> days) ++ value)
 			}
 		}
 	}
