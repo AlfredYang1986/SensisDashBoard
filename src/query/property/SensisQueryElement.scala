@@ -3,6 +3,7 @@ package query.property
 import query.from
 import scala.util.parsing.json.JSONArray
 import scala.util.parsing.json.JSONObject
+import query.QueryOrdering
 
 class SensisQueryElement {
 	var args : List[Property] = Nil
@@ -34,4 +35,27 @@ class SensisQueryElement {
 	
 	def foreach[B](f : Property => B) = args foreach f
 	def clear = args = Nil
+
+	def split : List[SensisQueryElement] = {
+	  	def splitAcc(acc : List[Property]) : List[SensisQueryElement] = {
+	  	  	if (acc.isEmpty) Nil
+	  	  	else {
+	  	  		val tmp = new SensisQueryElement
+	  	  		tmp.insertProperty(acc.head.name, acc.head.get)
+	  	  		splitAcc(acc.tail) :+ tmp
+	  	  	}
+	  	}
+	  	splitAcc(this.args)
+	}
+	
+	def orderValue : SensisQueryElement = {
+		val re = new SensisQueryElement
+		re.args = args.sortBy(x => x.get.asInstanceOf[Int])(new QueryOrdering[Int])
+		re
+	}
+	def orderDecendingValue : SensisQueryElement = {
+		val re = new SensisQueryElement
+		re.args = args.sortBy(x => x.get.asInstanceOf[Int])(new QueryOrdering[Int]).reverse
+		re
+	}
 }
