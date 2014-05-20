@@ -41,19 +41,26 @@ object SplunkQueryHelper {
 		def getPercentageForOrdering(p : Int, c: Int) : Double = 100.0 * (c - p) / p
 		def getPositionIncrement(p : Int, c: Int) : Int = p - c
 //		def getPositionIncrement(p : Int, c: Int) : String = "%d".format(p - c)
-	 
+	
+		if (right == null) null
+		
 		var index = 0
 		for (it <- right) {
 			if (index < t) {
-				val (pos, ins) = left.contains(it)( (x, y) => x.getProperty[String]("query") == y.getProperty[String]("query") && x.getProperty[String]("location") == y.getProperty[String]("location"))
-				if (ins != null) {
-					it.insertProperty("trends", getPercentage(ins.getProperty[Int]("times"), it.getProperty[Int]("times")))
-					it.insertProperty("pos", getPositionIncrement(pos, index))
-				} else {
+				if (left == null) {
 					it.insertProperty("trends", "new")
 					it.insertProperty("pos", "new")
+				} else {
+					val (pos, ins) = left.contains(it)( (x, y) => x.getProperty[String]("query") == y.getProperty[String]("query") && x.getProperty[String]("location") == y.getProperty[String]("location"))
+					if (ins != null) {
+						it.insertProperty("trends", getPercentage(ins.getProperty[Int]("times"), it.getProperty[Int]("times")))
+						it.insertProperty("pos", getPositionIncrement(pos, index))
+					} else {
+						it.insertProperty("trends", "new")
+						it.insertProperty("pos", "new")
+					}
+					index = index + 1
 				}
-				index = index + 1
 			}
 		}
 		right
