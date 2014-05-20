@@ -11,7 +11,7 @@ object SplunkQLQuery extends QueryTraits {
 	def isQueryable(property : String) : Boolean = false
 	def query(b : Int, e : Int, p : SensisQueryElement, r : String*) : JSONObject = ??? // only provide tops because it to slow
 	def queryTops(t : Int, b : Int, e : Int, p : SensisQueryElement, r : String*) : JSONObject = {
-		QueryElementToJSON(queryAcc(t, b, e, p, Array("times")).top(t).toList.sortBy(x => x.getProperty[Int]("times"))(Ordering[Int].reverse))
+		QueryElementToJSON(queryAcc(t, b, e, p, Array("times")).orderbyDecsending(x => x.getProperty[Int]("times")).top(t).toList)
 	}
 	
 	private def queryAcc(t : Int, b : Int, e : Int, p : SensisQueryElement, r : Array[String]) : IQueryable[SensisQueryElement] = {
@@ -66,7 +66,6 @@ object SplunkQLQuery extends QueryTraits {
 	  			if (con == null) con = tmp_c
 	  			else con = $or(con, tmp_c)
 	  		}
-//	  		con = $and("query" $eq "restaurants", "location" $eq "all,states")
 	  		val cur = SplunkDatabaseName.splunk_query_data.format(i)
 	  		val tmp = from db() in cur where con select resultConditons(fl)
 
