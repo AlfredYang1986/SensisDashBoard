@@ -27,13 +27,15 @@ object SplunkProxy extends APIProxy {
 		val service = Service.connect(SplunkKey.loginArgs)
 		
 		def getStartDate(duration : String) : Date = duration match {
-		  case "test" => date_format.parse("03/31/2014:03:00:00")
+//		  case "test" => date_format.parse("03/31/2014:03:00:00")
+		  case "test" => date_format.parse("04/01/2014:03:00:00")
 		  case "month" => val cal = Calendar.getInstance(); cal.setTime(new Date()); cal.add(Calendar.MONTH, -1); cal.getTime
 		  case _ => throw Error_PhraseXML
 		}
 		
 		def getEndDate(duration : String) : Date = duration match {
-		  case "test" => date_format.parse("04/07/2014:03:00:00")
+//		  case "test" => date_format.parse("04/07/2014:03:00:00")
+		  case "test" => date_format.parse("04/01/2014:04:00:00")
 		  case "month" => val cal = Calendar.getInstance(); cal.setTime(new Date()); cal.getTime
 		  case _ => throw Error_PhraseXML
 		}
@@ -98,12 +100,19 @@ object SplunkProxy extends APIProxy {
 				it_time = end.getTime()
 			}
 		}
-		
+
+		callback("start")
+		callback("property")
+		val ek = args.asInstanceOf[APISplunkArguments].args.get("external").get.asInstanceOf[String]
+		callback(ek)
+		callback("store")
 		key match {
 		  case SplunkKey => 
 			val duration = args.asInstanceOf[APISplunkArguments].args.get("duration")
 			.get.asInstanceOf[String];loopTimeSpan(getStartDate(duration), getEndDate(duration))
 		  case _ => throw Error_PhraseXML
 		}
+		callback("end")
+//		callback("none")
 	}
 }
