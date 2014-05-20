@@ -37,6 +37,7 @@ trait IQueryable[T] extends IEnumerable {
 	def unionAll[U](that : IQueryable[T])(f : (T, T) => T) : IQueryable[T]
 	
 	def contains(elem : T)(f : (T, T) => Boolean) : (Int, T)
+	def filter(f : T => Boolean) : IQueryable[T]
 }
 
 class Linq_List[T] extends IQueryable[T] {
@@ -164,5 +165,9 @@ class Linq_List[T] extends IQueryable[T] {
 			index = index + 1
 		}
 		(reIndex, reVal)
+	}
+	def filter(f : T => Boolean) : IQueryable[T] = {
+		this.coll = this.coll.filter(f)
+		this
 	}
 }

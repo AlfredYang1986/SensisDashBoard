@@ -13,6 +13,9 @@ object SplunkQLQuery extends QueryTraits {
 	def queryTops(t : Int, b : Int, e : Int, p : SensisQueryElement, r : String*) : JSONObject = {
 		QueryElementToJSON(queryAcc(t, b, e, p, Array("times")).orderbyDecsending(x => x.getProperty[Int]("times")).top(t).toList)
 	}
+	def queryWithQueryable(b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement] = {
+		queryAcc(-1, b, e, p, Array("times")).orderbyDecsending(x => x.getProperty[Int]("times"))
+	}
 	def queryTopsWithQueryable(t : Int, b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement] = {
 		queryAcc(t, b, e, p, Array("times")).orderbyDecsending(x => x.getProperty[Int]("times")).top(t)
 	}
@@ -51,12 +54,16 @@ object SplunkQLQuery extends QueryTraits {
 	  		}
 	  		else right
 	  	}
-	  	
+
 	  	val fl = r.toArray
+	  	def getQuery(d : String) : IQueryable[SensisQueryElement] = 
+	  		if (t > 0) (from db() in d where queryConditions).selectTop(t)("times")(resultConditons(fl))
+	  		else from db() in d where queryConditions select resultConditons(fl)
+	  	
 	  	var queryCan : IQueryable[SensisQueryElement] = null
 	  	for (i <- b to e) {
 	  		val cur = SplunkDatabaseName.splunk_query_data.format(i)
-	  		val tmp = (from db() in cur where queryConditions).selectTop(t)("times")(resultConditons(fl))
+	  		val tmp = getQuery(cur)
 	  		queryCan = unionResult(queryCan, tmp, fl)
 	  	}
 	  	

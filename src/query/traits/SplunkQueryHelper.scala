@@ -38,7 +38,9 @@ object SplunkQueryHelper {
 	 */
 	def splunkQueryCompare(left : IQueryable[SensisQueryElement], right : IQueryable[SensisQueryElement], t : Int) : IQueryable[SensisQueryElement] = {
 		def getPercentage(p : Int, c: Int) : String = "%.2f%%".format(100.0 * (c - p) / p)
-		def getPositionIncrement(p : Int, c: Int) : String = "%d".format(p - c)
+		def getPercentageForOrdering(p : Int, c: Int) : Double = 100.0 * (c - p) / p
+		def getPositionIncrement(p : Int, c: Int) : Int = p - c
+//		def getPositionIncrement(p : Int, c: Int) : String = "%d".format(p - c)
 	 
 		var index = 0
 		for (it <- right) {
@@ -55,5 +57,21 @@ object SplunkQueryHelper {
 			}
 		}
 		right
+	}
+	def splunkQueryHotQuery(q : IQueryable[SensisQueryElement]) : IQueryable[SensisQueryElement] = {
+		try {
+			q.filter(x => !(x.getProperty("pos").isInstanceOf[String])).orderbyDecsending(x => x.getProperty[Int]("pos"))
+		  
+		} catch {
+		  case _ => q
+		}
+	}
+	def splunkQueryColdQuery(q : IQueryable[SensisQueryElement]) : IQueryable[SensisQueryElement] = {
+		try {
+			q.filter(x => !(x.getProperty("pos").isInstanceOf[String])).orderby(x => x.getProperty[Int]("pos"))
+		  
+		} catch {
+		  case _ => q
+		}
 	}
 }
