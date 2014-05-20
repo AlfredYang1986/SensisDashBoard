@@ -75,4 +75,6 @@ object MasheryQuery extends QueryTraits {
     }
     userMap
   }
+	def queryTopsWithQueryable(t : Int, b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement] = ???
+
 }

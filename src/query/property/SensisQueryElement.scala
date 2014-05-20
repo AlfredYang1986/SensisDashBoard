@@ -58,4 +58,6 @@ class SensisQueryElement {
 		re.args = args.sortBy(x => x.get.asInstanceOf[Int])(new QueryOrdering[Int]).reverse
 		re
 	}
+	def removeProperty(name : String) : Unit = args = args.filter(x => x.name != name)
+	def removeProperty(p : Property) : Unit = removeProperty(p.name)
 }

@@ -96,9 +96,6 @@ class AMongoDBLINQ extends IDatabaseContext {
 	}
 
 	def contains : Boolean = {
-<<<<<<< HEAD
-		!select(x => x).empty
-=======
 		!(select (x => x).empty)
 	}
 	
@@ -110,6 +107,5 @@ class AMongoDBLINQ extends IDatabaseContext {
 			nc = (nc :+ cr(i)).asInstanceOf[Linq_List[U]]
 		}
 		nc
->>>>>>> FETCH_HEAD
 	}
 }

@@ -30,4 +30,30 @@ object SplunkQueryHelper {
 	  		}
 	  		else right
 	  	}
+	
+	/**
+	 * @left	: previous query
+	 * @right	: current  query
+	 * @return  : current  query with trends
+	 */
+	def splunkQueryCompare(left : IQueryable[SensisQueryElement], right : IQueryable[SensisQueryElement], t : Int) : IQueryable[SensisQueryElement] = {
+		def getPercentage(p : Int, c: Int) : String = "%.2f%%".format(100.0 * (c - p) / p)
+		def getPositionIncrement(p : Int, c: Int) : String = "%d".format(p - c)
+	 
+		var index = 0
+		for (it <- right) {
+			if (index < t) {
+				val (pos, ins) = left.contains(it)( (x, y) => x.getProperty[String]("query") == y.getProperty[String]("query") && x.getProperty[String]("location") == y.getProperty[String]("location"))
+				if (ins != null) {
+					it.insertProperty("trends", getPercentage(ins.getProperty[Int]("times"), it.getProperty[Int]("times")))
+					it.insertProperty("pos", getPositionIncrement(pos, index))
+				} else {
+					it.insertProperty("trends", "new")
+					it.insertProperty("pos", "new")
+				}
+				index = index + 1
+			}
+		}
+		right
+	}
 }

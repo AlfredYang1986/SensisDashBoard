@@ -13,6 +13,9 @@ object SplunkQLQuery extends QueryTraits {
 	def queryTops(t : Int, b : Int, e : Int, p : SensisQueryElement, r : String*) : JSONObject = {
 		QueryElementToJSON(queryAcc(t, b, e, p, Array("times")).orderbyDecsending(x => x.getProperty[Int]("times")).top(t).toList)
 	}
+	def queryTopsWithQueryable(t : Int, b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement] = {
+		queryAcc(t, b, e, p, Array("times")).orderbyDecsending(x => x.getProperty[Int]("times")).top(t)
+	}
 	
 	private def queryAcc(t : Int, b : Int, e : Int, p : SensisQueryElement, r : Array[String]) : IQueryable[SensisQueryElement] = {
 	  	def queryConditions : DBObject = {
@@ -56,7 +59,6 @@ object SplunkQLQuery extends QueryTraits {
 	  		val tmp = (from db() in cur where queryConditions).selectTop(t)("times")(resultConditons(fl))
 	  		queryCan = unionResult(queryCan, tmp, fl)
 	  	}
-	  	queryCan
 	  	
 	  	var query : IQueryable[SensisQueryElement] = null
 	  	for (i <- b to e) {

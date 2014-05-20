@@ -19,6 +19,7 @@ object SplunkQuery extends QueryTraits {
 	  	val re = queryAcc(b, e, p, r.toArray)(SplunkQueryHelper.unionResultBaseOnEndPoint)
 	  	QueryElementToJSON(re.toList.head.orderValue.split.take(t))
 	}
+	def queryTopsWithQueryable(t : Int, b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement] = ???
 	
 	private def queryAcc(b : Int, e : Int, p : SensisQueryElement, r : Array[String])
 			(f : (IQueryable[SensisQueryElement], IQueryable[SensisQueryElement], Array[String]) => IQueryable[SensisQueryElement]) 
