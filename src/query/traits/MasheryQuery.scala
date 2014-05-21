@@ -31,6 +31,10 @@ object MasheryQuery extends QueryTraits {
 
   def queryTops(t: Int, b: Int, e: Int, p: SensisQueryElement, r: String*): JSONObject = ???
 
+  def queryTopsWithQueryable(t: Int, b: Int, e: Int, p: SensisQueryElement, r: String*): IQueryable[SensisQueryElement] = ???
+
+  def queryWithQueryable(b: Int, e: Int, p: SensisQueryElement, r: String*): IQueryable[SensisQueryElement] = ???
+
   def queryBase(start: Int, end: Int, conditions: SensisQueryElement, req: Array[String]): Map[String, List[SensisQueryElement]] = {
 
     def queryConditions: DBObject = {
@@ -61,7 +65,7 @@ object MasheryQuery extends QueryTraits {
 
     /* Conditions for results */
     var fl: Array[String] = null
-    if (req.head. equals("*"))
+    if (req.head.equals("*"))
       fl = Array("display_name", "first_name", "last_name", "username", "email",
         "area_status", "postal_code", "country_code", "created", "updated")
     else
@@ -76,6 +80,8 @@ object MasheryQuery extends QueryTraits {
     }
     userMap
   }
+
 	def queryTopsWithQueryable(t : Int, b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement] = ???
 	def queryWithQueryable(b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement] = ???
+
 }

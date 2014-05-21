@@ -97,7 +97,11 @@ class AMongoDBLINQ extends IDatabaseContext {
 	}
 
 	def contains : Boolean = {
+<<<<<<< HEAD
+		!select(x => x).empty
+=======
 		!(select (x => x).empty)
+>>>>>>> FETCH_HEAD
 	}
 	
 	def selectTop[U](n : Int)(o : String)(cr : (MongoDBObject) => U) : IQueryable[U] = {
