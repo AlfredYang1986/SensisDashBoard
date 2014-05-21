@@ -6,20 +6,25 @@ import query._
 import query.property.SensisQueryElement
 import com.mongodb.casbah.Imports._
 import query.property.QueryElementToJSON
+import scala.util.parsing.json.JSONArray
 
 object SplunkQuery extends QueryTraits {
 	def support: List[String] = List("overall", "yello", "non-yello")
   
 	def isQueryable(property : String) : Boolean = support.contains(property)
 	def query(b : Int, e : Int, p : SensisQueryElement, r : String*) : JSONObject = {
-	  	QueryElementToJSON(queryAcc(b, e, p, r.toArray).toList)
+	  	QueryElementToJSON(queryAcc(b, e, p, r.toArray)(SplunkQueryHelper.unionResultBaseOnUser).toList)
 	}
+	def queryWithQueryable(b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement] = ???
 	def queryTops(t : Int, b : Int, e : Int, p : SensisQueryElement, r : String*) : JSONObject = {
-	  	val re = queryAcc(b, e, p, r.toArray).orderbyDecsending(x => x.getProperty(r.head)).top(t)
-	  	QueryElementToJSON(re.toList)
+	  	val re = queryAcc(b, e, p, r.toArray)(SplunkQueryHelper.unionResultBaseOnEndPoint)
+	  	QueryElementToJSON(re.toList.head.orderValue.split.take(t))
 	}
+	def queryTopsWithQueryable(t : Int, b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement] = ???
 	
-	private def queryAcc(b : Int, e : Int, p : SensisQueryElement, r : Array[String]) : IQueryable[SensisQueryElement] = {
+	private def queryAcc(b : Int, e : Int, p : SensisQueryElement, r : Array[String])
+			(f : (IQueryable[SensisQueryElement], IQueryable[SensisQueryElement], Array[String]) => IQueryable[SensisQueryElement]) 
+			: IQueryable[SensisQueryElement] = {
 	  	def queryConditions : DBObject = {
 	  	  	val builder = MongoDBObject.newBuilder
 	  	  	for (it <- p) {
@@ -36,19 +41,7 @@ object SplunkQuery extends QueryTraits {
 	  	  	}
 	  	  	re
 	  	}
-	  	def unionResult(left : IQueryable[SensisQueryElement], right : IQueryable[SensisQueryElement], fl : Array[String]) : IQueryable[SensisQueryElement] = {
-	  		if (left != null) left.union(right)(x => x.getProperty[String]("key")) { (x, y) => 
-	  				if (x == null) y
-	  				else if (y == null) x
-	  				else {
-	  					val re = new SensisQueryElement
-	  					re.insertProperty("key", x.getProperty[String]("key"))
-	  					for (it <- fl) re.insertProperty(it, x.getProperty[Int](it) + y.getProperty[Int](it))
-	  					re
-	  				}
-	  		   }
-	  		else right
-	  	}
+	  	def unionResult(left : IQueryable[SensisQueryElement], right : IQueryable[SensisQueryElement], fl : Array[String]) : IQueryable[SensisQueryElement] = f(left, right, fl)
 	  	
 	  	var fl : Array[String] = null
 	  	if (r.length == 1 && r.head == "*") {

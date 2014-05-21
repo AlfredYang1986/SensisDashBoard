@@ -1,0 +1,84 @@
+package query.traits
+
+import query.IQueryable
+import query.property.SensisQueryElement
+
+object SplunkQueryHelper {
+	def unionResultBaseOnUser(left : IQueryable[SensisQueryElement], right : IQueryable[SensisQueryElement], fl : Array[String]) : IQueryable[SensisQueryElement] = {
+		if (left != null) left.union(right)(x => x.getProperty[String]("key")) { (x, y) => 
+	  		if (x == null) y
+	  		else if (y == null) x
+	  		else {
+	  			val re = new SensisQueryElement
+	  			re.insertProperty("key", x.getProperty[String]("key"))
+	  			for (it <- fl) re.insertProperty(it, x.getProperty[Int](it) + y.getProperty[Int](it))
+	  			re
+	  			}
+	  		}
+	  		else right
+	  	}
+	
+	def unionResultBaseOnEndPoint(left : IQueryable[SensisQueryElement], right : IQueryable[SensisQueryElement], fl : Array[String]) : IQueryable[SensisQueryElement] = {
+		if (left != null) left.unionAll(right) { (x, y) => 
+	  		if (x == null) y
+	  		else if (y == null) x
+	  		else {
+	  			val re = new SensisQueryElement
+	  			for (it <- fl) re.insertProperty(it, x.getProperty[Int](it) + y.getProperty[Int](it))
+	  			re
+	  			}
+	  		}
+	  		else right
+	  	}
+	
+	/**
+	 * @left	: previous query
+	 * @right	: current  query
+	 * @return  : current  query with trends
+	 */
+	def splunkQueryCompare(left : IQueryable[SensisQueryElement], right : IQueryable[SensisQueryElement], t : Int) : IQueryable[SensisQueryElement] = {
+		def getPercentage(p : Int, c: Int) : String = "%.2f%%".format(100.0 * (c - p) / p)
+		def getPercentageForOrdering(p : Int, c: Int) : Double = 100.0 * (c - p) / p
+		def getPositionIncrement(p : Int, c: Int) : Int = p - c
+//		def getPositionIncrement(p : Int, c: Int) : String = "%d".format(p - c)
+	
+		if (right == null) null
+		
+		var index = 0
+		for (it <- right) {
+			if (index < t) {
+				if (left == null) {
+					it.insertProperty("trends", "new")
+					it.insertProperty("pos", "new")
+				} else {
+					val (pos, ins) = left.contains(it)( (x, y) => x.getProperty[String]("query") == y.getProperty[String]("query") && x.getProperty[String]("location") == y.getProperty[String]("location"))
+					if (ins != null) {
+						it.insertProperty("trends", getPercentage(ins.getProperty[Int]("times"), it.getProperty[Int]("times")))
+						it.insertProperty("pos", getPositionIncrement(pos, index))
+					} else {
+						it.insertProperty("trends", "new")
+						it.insertProperty("pos", "new")
+					}
+					index = index + 1
+				}
+			}
+		}
+		right
+	}
+	def splunkQueryHotQuery(q : IQueryable[SensisQueryElement]) : IQueryable[SensisQueryElement] = {
+		try {
+			q.filter(x => !(x.getProperty("pos").isInstanceOf[String])).orderbyDecsending(x => x.getProperty[Int]("pos"))
+		  
+		} catch {
+		  case _ => q
+		}
+	}
+	def splunkQueryColdQuery(q : IQueryable[SensisQueryElement]) : IQueryable[SensisQueryElement] = {
+		try {
+			q.filter(x => !(x.getProperty("pos").isInstanceOf[String])).orderby(x => x.getProperty[Int]("pos"))
+		  
+		} catch {
+		  case _ => q
+		}
+	}
+}

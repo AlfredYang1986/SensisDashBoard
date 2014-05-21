@@ -8,6 +8,7 @@ package query.traits
 
 import scala.util.parsing.json.JSONObject
 import query.property.SensisQueryElement
+import query.IQueryable
 
 trait QueryTraits {
 
@@ -23,7 +24,9 @@ trait QueryTraits {
 	 * @p : properties that want to query
 	 */
 	def query(b : Int, e : Int, p : SensisQueryElement, r : String*) : JSONObject
+	def queryWithQueryable(b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement]
 	def queryTops(t : Int, b : Int, e : Int, p : SensisQueryElement, r : String*) : JSONObject 
+	def queryTopsWithQueryable(t : Int, b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement]
 }
 
 object QueryTraitsFactory {

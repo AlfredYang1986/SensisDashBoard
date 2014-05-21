@@ -34,6 +34,10 @@ trait IQueryable[T] extends IEnumerable {
 	def toString : String
 	
 	def union[U](that : IQueryable[T])(g : T => U)(f : (T, T) => T) : IQueryable[T]
+	def unionAll[U](that : IQueryable[T])(f : (T, T) => T) : IQueryable[T]
+	
+	def contains(elem : T)(f : (T, T) => Boolean) : (Int, T)
+	def filter(f : T => Boolean) : IQueryable[T]
 }
 
 class Linq_List[T] extends IQueryable[T] {
@@ -134,5 +138,36 @@ class Linq_List[T] extends IQueryable[T] {
 		}
 		nc.coll = ncoll
 		nc
+	}
+	def unionAll[U](that : IQueryable[T])(f : (T, T) => T) : IQueryable[T] = {
+	 	val nc = new Linq_List[T]
+		var ncoll : List[T] = Nil//new Linq_List[T]
+		
+		for (it <- that) {
+			val l = (from[T] in coll select (x => x)).fistOrDefault
+			val r = (from[T] in that.toList select (x => x)).fistOrDefault
+	
+			if (l.isEmpty && r.isEmpty) ncoll = ncoll
+			else if (l.isEmpty) ncoll = ncoll :+ r.get
+			else if (r.isEmpty) ncoll = ncoll :+ l.get
+			else ncoll = ncoll :+ f(l.get, r.get)
+		}
+		nc.coll = ncoll
+		nc 
+	}
+	def contains(elem : T)(f : (T, T) => Boolean) : (Int, T) = {
+		var reVal : T = null.asInstanceOf[T]
+		var reIndex = 0
+	
+		var index = 0
+		for (it <- this) {
+			if (f(it, elem)) { reVal = it; reIndex = index }
+			index = index + 1
+		}
+		(reIndex, reVal)
+	}
+	def filter(f : T => Boolean) : IQueryable[T] = {
+		this.coll = this.coll.filter(f)
+		this
 	}
 }
