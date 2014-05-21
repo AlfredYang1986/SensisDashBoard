@@ -79,6 +79,7 @@ class AMongoDBLINQ extends IDatabaseContext {
 			arg match {
 			  case a: (String, AnyRef) => w += a
 			  case a: DBObject => w = w ++ a
+			  case _ => w
 			}
 		}
 		this

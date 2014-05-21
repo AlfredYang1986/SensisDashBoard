@@ -11,6 +11,7 @@ import query.BaseTimeSpan
 import query.from
 import query.property.SensisQueryElement
 import cache.MasheryDatabaseName
+import query.IQueryable
 
 object MasheryQuery extends QueryTraits {
   def isQueryable(property: String): Boolean = false
@@ -76,6 +77,5 @@ object MasheryQuery extends QueryTraits {
     userMap
   }
 	def queryTopsWithQueryable(t : Int, b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement] = ???
-def queryWithQueryable(b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement] = ???
-
+	def queryWithQueryable(b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement] = ???
 }
