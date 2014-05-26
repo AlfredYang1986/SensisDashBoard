@@ -8,7 +8,6 @@ class SplunkCacheFacade {
 	  case "raw_yello" => SplunkRawYelloDataCache
 	  case "endpoint" => SplunkEndPointCache
 	  case "query" => SplunkQueryLocationCache
-	  case "searchQuality" => SearchQualityCache
 	  case _ => ???
 	}
 
