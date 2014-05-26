@@ -2,7 +2,7 @@ package query.helper
 
 import cache.SplunkCacheFacade
 
-class SearchQualityHelper {
+object SearchQualityHelper {
 
   def insertData(dataMap: Map[String, Any]) {
     val cache = new SplunkCacheFacade
