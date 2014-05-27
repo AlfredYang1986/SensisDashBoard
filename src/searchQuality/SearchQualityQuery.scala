@@ -60,17 +60,17 @@ object SearchQualityQuery extends SearchQualityQryTrait {
       result.insertProperty("SAPI_curr", (right.getProperty[String]("SAPI")).toDouble)
       result.insertProperty("SAPI_prev", (left.getProperty[String]("SAPI")).toDouble)
       result.insertProperty("SAPI_change", ((right.getProperty[String]("SAPI")).toDouble - left.getProperty[String]("SAPI").toDouble))
-      result.insertProperty("SAPI_comment", (right.getProperty[String]("SAPI")).toDouble)
+      result.insertProperty("SAPI_comment", right.getProperty[String]("SAPI_Comment"))
 
       result.insertProperty("Yellow_curr", (right.getProperty[String]("Yellow")).toDouble)
       result.insertProperty("Yellow_prev", (left.getProperty[String]("Yellow")).toDouble)
       result.insertProperty("Yellow_change", ((right.getProperty[String]("Yellow")).toDouble - left.getProperty[String]("Yellow").toDouble))
-      result.insertProperty("Yellow_comment", (right.getProperty[String]("SAPI")).toDouble)
+      result.insertProperty("Yellow_comment", right.getProperty[String]("Yellow_Comment"))
 
       result.insertProperty("one_curr", (right.getProperty[String]("One_Search")).toDouble)
       result.insertProperty("one_prev", (left.getProperty[String]("One_Search")).toDouble)
       result.insertProperty("one_change", ((right.getProperty[String]("One_Search")).toDouble - left.getProperty[String]("One_Search").toDouble))
-      result.insertProperty("one_comment", (right.getProperty[String]("SAPI")).toDouble)
+      result.insertProperty("one_comment", right.getProperty[String]("One_Search_Comment"))
 
       result :: List.empty[SensisQueryElement]
     } else
