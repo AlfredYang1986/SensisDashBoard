@@ -7,8 +7,11 @@ import com.mongodb.casbah.Imports._
 import query._
 import com.mongodb.casbah.commons.MongoDBObject
 import cache.SearchQualityDBName
+import query.property.SensisQueryElement
+import query.property.QueryElementToJSON
+import scala.util.parsing.json.JSONObject
 
-object SearchQualityInsert {
+object SearchQualityClient {
 
   /**
    * @param dataMap - Data inserted via interface, as key-value pairs
@@ -51,7 +54,7 @@ object SearchQualityInsert {
     }
   }
 
-  private def deleteRecord(days:Int, dataMap: Map[String, Any]): Boolean = {
+  private def deleteRecord(days: Int, dataMap: Map[String, Any]): Boolean = {
     def getCollection = {
       if (dataMap.size > 7) _data_connection.getCollection(SearchQualityDBName.evaluation_matric_data)
       else _data_connection.getCollection(SearchQualityDBName.search_quality_data)
