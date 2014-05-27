@@ -2,10 +2,10 @@ package searchQuality
 
 object SearchQualityHelper {
 
-  def insertOrUpdate(dataMap: Map[String, Any]): Boolean = {
-    SearchQualityInsert.add(dataMap)
+  def insertOrUpdate(days: Int, dataMap: Map[String, Any]): Boolean = {
+    SearchQualityInsert.add(days, dataMap)
   }
 
-  def deleteRecord(dataMap: Map[String, Any]): Boolean = SearchQualityInsert.delete(dataMap)
+  def deleteRecord(days: Int, dataMap: Map[String, Any]): Boolean = SearchQualityInsert.delete(days, dataMap)
 
 }

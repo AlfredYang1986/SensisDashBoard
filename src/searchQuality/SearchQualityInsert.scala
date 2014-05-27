@@ -14,21 +14,19 @@ object SearchQualityInsert {
    * @param dataMap - Data inserted via interface, as key-value pairs
    * @return a boolean that indicate status of insert or update
    */
-  def add(dataMap: Map[String, Any]): Boolean = {
-    addOrUpdate(dataMap)
+  def add(days: Int, dataMap: Map[String, Any]): Boolean = {
+    addOrUpdate(days, dataMap)
   }
 
   /**
    * @param dataMap - Data inserted via interface, as key-value pairs
    * @return
    */
-  def delete(dataMap: Map[String, Any]): Boolean = {
-    deleteRecord(dataMap)
+  def delete(days: Int, dataMap: Map[String, Any]): Boolean = {
+    deleteRecord(days, dataMap)
   }
 
-  private def addOrUpdate(dataMap: Map[String, Any]): Boolean = {
-    val days = dataMap.getOrElse("days", 0).##
-
+  private def addOrUpdate(days: Int, dataMap: Map[String, Any]): Boolean = {
     def getCollection = {
       if (dataMap.size > 7) _data_connection.getCollection(SearchQualityDBName.evaluation_matric_data)
       else _data_connection.getCollection(SearchQualityDBName.search_quality_data)
@@ -53,14 +51,14 @@ object SearchQualityInsert {
     }
   }
 
-  private def deleteRecord(dataMap: Map[String, Any]): Boolean = {
+  private def deleteRecord(days:Int, dataMap: Map[String, Any]): Boolean = {
     def getCollection = {
       if (dataMap.size > 7) _data_connection.getCollection(SearchQualityDBName.evaluation_matric_data)
       else _data_connection.getCollection(SearchQualityDBName.search_quality_data)
     }
 
     try {
-      getCollection.remove(MongoDBObject("days" -> dataMap.getOrElse("days", 0).##))
+      getCollection.remove(MongoDBObject("days" -> days))
       true
     } catch {
       case e: MongoException => false
