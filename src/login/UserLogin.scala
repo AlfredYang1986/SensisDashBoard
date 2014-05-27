@@ -35,11 +35,11 @@ object UserLogin {
 	
 	def changePassword(username : String, password : String) : Boolean =
 		(from db() in "user_name" where ("username" -> username) select (x => x)).fistOrDefault match {
-		  case Some(e) => _data_connection.getCollection("user_name").update(e, ("password" $eq password)); true
+		  case Some(e) => _data_connection.getCollection("user_name").update(e, e ++ ("password" $eq password)); true
 		  case none => false
 		}
 	
-		def level(username : String) = 
+	def level(username : String) = 
 		(from db() in "user_name" where ("username" -> username) select (x => x)).fistOrDefault match {
 		  case Some(e) => e.get("utype"); e.get("utype")
 		  case none => false
