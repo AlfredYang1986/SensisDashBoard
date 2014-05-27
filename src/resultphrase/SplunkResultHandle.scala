@@ -59,7 +59,7 @@ object SplunkResultHandle extends ResultHandle {
 		cache.cleanAll
 		cache.initAll
 	}
-	def end = cache.synchonaizeAll
+	def end = cache.synchonaizeAll("raw", "raw_yello", "endpoint", "query")
 
 	def saveKey(k : String) = special_key = k
 	
