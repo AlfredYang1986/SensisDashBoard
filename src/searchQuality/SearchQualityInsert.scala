@@ -36,10 +36,8 @@ object SearchQualityInsert {
     }
 
     val oldRecord = getExistingRecord.one
-    if (oldRecord != null) {      
-      getCollection += (oldRecord ++ db.result)
-    } else
-      getCollection += db.result
+    if (oldRecord != null) getCollection += (oldRecord ++ db.result)
+    else getCollection += db.result
   }
 
   private def deleteRecord(dataMap: Map[String, Any]) = {
