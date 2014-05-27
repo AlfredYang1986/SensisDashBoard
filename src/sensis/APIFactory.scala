@@ -54,12 +54,14 @@ object APIFactory {
 			case "APIConcreteProxyDemo" => APIConcreteProxyDemo
 			case "Mashery-Sandbox" => MasheryProxy
 			case "Splunk" => SplunkProxy
+			case "SplunkRquest" => SplunkRequestProxy
 			case _ => null
 		}
 
 		def getResultHandle(name: String) : ResultHandle = name match {
 			case "SplunkXML" => SplunkResultHandle
 			case "MasheryJSON" => MasheryReulstHandle
+			case "SplunkRequestJSON" => SplunkRequestJSONHandle
 			case _ => PrintlnResultHandle
 		}
 		

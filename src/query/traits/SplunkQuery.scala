@@ -18,7 +18,8 @@ object SplunkQuery extends QueryTraits {
 	def queryWithQueryable(b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement] = ???
 	def queryTops(t : Int, b : Int, e : Int, p : SensisQueryElement, r : String*) : JSONObject = {
 	  	val re = queryAcc(b, e, p, r.toArray)(SplunkQueryHelper.unionResultBaseOnEndPoint)
-	  	QueryElementToJSON(re.toList.head.orderValue.split.take(t))
+	  	if (!re.empty) QueryElementToJSON(re.toList.head.orderValue.split.take(t))
+	  	else QueryElementToJSON(re.toList)
 	}
 	def queryTopsWithQueryable(t : Int, b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement] = ???
 	
