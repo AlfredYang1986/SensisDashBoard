@@ -17,3 +17,8 @@ object MasheryDatabaseName {
   	def mashery_data = "masherydata"
   	def mashery_summary = "mashery_summary_%d"
 }
+
+object SearchQualityDBName {
+  def search_quality_data = "search_quality_data"
+  def evaluation_matric_data = "eval_matric_data"
+}
