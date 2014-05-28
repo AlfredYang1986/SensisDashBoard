@@ -4,21 +4,23 @@ package unit_test
 import query.property.SensisQueryElement
 import searchQuality.SearchQualityQuery
 import searchQuality.SearchQualityClient
+import searchQuality.EvalQualityQuery
 
 object SearchQualityInsertDemo extends App {
 
-  val datamap: Map[String, Any] = Map("SAPI" -> "56.90", "SAPI_Comment" -> "bla.. bla..", "Yellow" -> "33.33", "Yellow_Comment" -> "more bla.. bla..", "One_Search" -> "12.00", "One_Search_Comment" -> "30.00")
+  val datamap: Map[String, Any] = Map("SAPI" -> "", "SAPI_Comment" -> "bla.. bla..", "Yellow" -> "44.33", "Yellow_Comment" -> "more bla.. bla..", "One_Search" -> "", "One_Search_Comment" -> "")
+  
+  val evaldatamap: Map[String, Any] = Map("Name_Search"-> "", "Name_Search_Comment"-> "bla.. bla..", "Type_Search"-> "59.33", "Type_Search_Comment"-> "bla.. bla..", "Concept_Recall"-> "", "Concept_Recall_Comment"-> "bla.. bla..", "Duplicates"-> "12.33","Duplicates_Comment"-> "bla.. bla..", "Zero_Results"-> "89.33", "Zero_Results_Comment"-> "bla.. bla..")
 
   /* Add and Update demo*/
-//  SearchQualityClient.add(10302, datamap)
+//  SearchQualityClient.add(10299, datamap)
+//  SearchQualityClient.add(10301, evaldatamap)
+ 
+  /* search query demo*/
+//  println("queryyyyyyyyyyyyy   " + SearchQualityQuery.query(10302, new SensisQueryElement, "*"))
+//  println("commmmmmmmmm   " + SearchQualityQuery.compare(0, 0, new SensisQueryElement, "*"))
   
-//  SearchQualityHelper.deleteRecord(datamap)  
-  
-//  val sqe = new SensisQueryElement
-//  sqe.insertProperty("collection", "search")
-//  println(SearchQualityHelper.compare(10299, sqe))
-  
-  /* query demo*/
-  println(SearchQualityQuery.query(0, new SensisQueryElement, "*"))
-  println(SearchQualityQuery.compare(0, 0, new SensisQueryElement, "*"))
+  /* eval query demo*/
+//  println("queryyyyyyyyyyyyy   " + EvalQualityQuery.query(10302, new SensisQueryElement, "*"))
+//  println("commmmmmmmmm   " + EvalQualityQuery.compare(0, 0, new SensisQueryElement, "*"))
 } 

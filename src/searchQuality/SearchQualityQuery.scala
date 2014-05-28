@@ -29,6 +29,7 @@ object SearchQualityQuery extends SearchQualityQryTrait {
   }
 
   private def queryRecord(days: Int, sqe: SensisQueryElement, arr: Array[String]): IQueryable[SensisQueryElement] = {
+    var dataRecord: IQueryable[SensisQueryElement] = null
 
     var fl: Array[String] = null
     if (arr.length == 1)
@@ -36,45 +37,52 @@ object SearchQualityQuery extends SearchQualityQryTrait {
     else
       fl = arr.toArray
 
-    val dataRecord = from db () in SearchQualityDBName.search_quality_data select queryAsSensisQueryElem(fl)
+    if (days == 0)
+      dataRecord = from db () in SearchQualityDBName.search_quality_data select queryAsSensisQueryElem(fl)
+    else
+      dataRecord = from db () in SearchQualityDBName.search_quality_data where ("days" -> days) select queryAsSensisQueryElem(fl)
+
     dataRecord
   }
 
-  private def compareBase(b: Int, e: Int, sqe: SensisQueryElement, arr: Array[String]): List[SensisQueryElement] = {
+  private def compareBase(begin: Int, end: Int, sqe: SensisQueryElement, arr: Array[String]): List[SensisQueryElement] = {
+    def calcChange(left: String, right: String) = {
+      if (left.equals("") || right.equals(""))
+        "Quality values undefined"
+      else
+        "%.2f".format(right.toDouble - left.toDouble)
+    }
 
-    var left: SensisQueryElement = null
-    var right: SensisQueryElement = null
+    def getComparison(left: SensisQueryElement, right: SensisQueryElement) = {
+      var result: SensisQueryElement = new SensisQueryElement
 
-    if (b == 0 && e == 0) {
+      for (it <- right.args) {
+        if (it.name.toLowerCase.contains("comment"))
+          result.insertProperty(it.name, if (it.get.toString.equals("")) "Undefined" else it.get.toString)
+        else if (it.name != "days"){
+          result.insertProperty("%s_curr".format(it.name), if (it.get.toString.equals("")) "Undefined" else (it.get.toString).toDouble)
+          result.insertProperty("%s_prev".format(it.name), if (left.getProperty(it.name).equals("")) "Undefined" else (left.getProperty(it.name).toString).toDouble)
+          result.insertProperty("%s_change".format(it.name), calcChange(left.getProperty(it.name).toString, it.get.toString))
+        }
+      }
+      result
+    }
+
+    if (begin == 0 && end == 0) {
       val recordsList = (queryRecord(0, sqe, arr).orderbyDecsending(x => x.getProperty[Int]("days")).top(2)).toList
 
-      if (recordsList(0).getProperty[Int]("days") > recordsList(1).getProperty[Int]("days")) {
-        left = recordsList(1)
-        right = recordsList(0)
-      } else {
-        left = recordsList(0)
-        right = recordsList(1)
-      }
-
-      var result: SensisQueryElement = new SensisQueryElement
-      result.insertProperty("SAPI_curr", (right.getProperty[String]("SAPI")).toDouble)
-      result.insertProperty("SAPI_prev", (left.getProperty[String]("SAPI")).toDouble)
-      result.insertProperty("SAPI_change", ((right.getProperty[String]("SAPI")).toDouble - left.getProperty[String]("SAPI").toDouble))
-      result.insertProperty("SAPI_comment", right.getProperty[String]("SAPI_Comment"))
-
-      result.insertProperty("Yellow_curr", (right.getProperty[String]("Yellow")).toDouble)
-      result.insertProperty("Yellow_prev", (left.getProperty[String]("Yellow")).toDouble)
-      result.insertProperty("Yellow_change", ((right.getProperty[String]("Yellow")).toDouble - left.getProperty[String]("Yellow").toDouble))
-      result.insertProperty("Yellow_comment", right.getProperty[String]("Yellow_Comment"))
-
-      result.insertProperty("one_curr", (right.getProperty[String]("One_Search")).toDouble)
-      result.insertProperty("one_prev", (left.getProperty[String]("One_Search")).toDouble)
-      result.insertProperty("one_change", ((right.getProperty[String]("One_Search")).toDouble - left.getProperty[String]("One_Search").toDouble))
-      result.insertProperty("one_comment", right.getProperty[String]("One_Search_Comment"))
-
+      val result: SensisQueryElement = getComparison(recordsList(1), recordsList(0))
       result :: List.empty[SensisQueryElement]
+
+    } else if (begin != 0 && end != 0) {
+      val left = queryRecord(begin, sqe, arr).toList
+      val right = queryRecord(end, sqe, arr).toList
+
+      val result: SensisQueryElement = getComparison(left(0), right(0))
+      result :: List.empty[SensisQueryElement]
+
     } else
-      null
+      List.empty[SensisQueryElement]
   }
 
 }
