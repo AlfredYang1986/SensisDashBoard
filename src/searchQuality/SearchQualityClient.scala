@@ -25,8 +25,8 @@ object SearchQualityClient {
    * @param dataMap - Data inserted via interface, as key-value pairs
    * @return
    */
-  def delete(days: Int, dataMap: Map[String, Any]): Boolean = {
-    deleteRecord(days, dataMap)
+  def delete(days: Int, sqe: SensisQueryElement): Boolean = {
+    deleteRecord(days, sqe)
   }
 
   private def addOrUpdate(days: Int, dataMap: Map[String, Any]): Boolean = {
@@ -54,17 +54,19 @@ object SearchQualityClient {
     }
   }
 
-  private def deleteRecord(days: Int, dataMap: Map[String, Any]): Boolean = {
+  private def deleteRecord(days: Int, sqe: SensisQueryElement): Boolean = {
     def getCollection = {
-      if (dataMap.size > 7) _data_connection.getCollection(SearchQualityDBName.evaluation_matric_data)
+      if (sqe.getProperty[String]("collection").equalsIgnoreCase("eval")) _data_connection.getCollection(SearchQualityDBName.evaluation_matric_data)
       else _data_connection.getCollection(SearchQualityDBName.search_quality_data)
     }
 
-    try {
-      getCollection.remove(MongoDBObject("days" -> days))
-      true
-    } catch {
-      case e: MongoException => false
-    }
+    if ((sqe != null) && (sqe.getProperty[String]("collection") != null)) {
+      try {
+        getCollection.remove(MongoDBObject("days" -> days))
+        true
+      } catch {
+        case e: MongoException => false
+      }
+    } else false
   }
 }

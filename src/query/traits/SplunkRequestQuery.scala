@@ -6,16 +6,25 @@ import query.property.SensisQueryElement
 import com.mongodb.casbah.Imports._
 import cache.SplunkDatabaseName
 import query.from
+import query.property.QueryElementToJSON
 
 object SplunkRequestQuery extends QueryTraits {
 	def isQueryable(property : String) : Boolean = false
 	
-	def query(b : Int, e : Int, p : SensisQueryElement, r : String*) : JSONObject = ???
-	def queryWithQueryable(b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement] = ???
+	def query(b : Int, e : Int, p : SensisQueryElement, r : String*) : JSONObject = {
+	  	QueryElementToJSON(query_acc(b, e, p, r.toArray).toList)
+	}
+	def queryWithQueryable(b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement] = {
+		query_acc(b, e, p, r.toArray)
+	}
 	def queryTops(t : Int, b : Int, e : Int, p : SensisQueryElement, r : String*) : JSONObject = ???
 	def queryTopsWithQueryable(t : Int, b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement] = ???
 	
+<<<<<<< HEAD
 	def query_acc(b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement] = {
+=======
+	private def query_acc(b : Int, e : Int, p : SensisQueryElement, r : Array[String]) : IQueryable[SensisQueryElement] = {
+>>>>>>> FETCH_HEAD
 		
 		def getFirstElement : String = p.getProperty[String]("first")
 		def getSecendElement : String = p.getProperty[String]("secend")

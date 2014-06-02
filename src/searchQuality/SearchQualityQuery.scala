@@ -7,6 +7,8 @@ import scala.util.parsing.json.JSONObject
 import query.property.QueryElementToJSON
 import cache.SearchQualityDBName
 import scala.util.parsing.json.JSONObject
+import query.helper.SplunkHelper
+import scala.util.parsing.json.JSONObject
 
 object SearchQualityQuery extends SearchQualityQryTrait {
 
@@ -16,6 +18,15 @@ object SearchQualityQuery extends SearchQualityQryTrait {
 
   def compare(b: Int, e: Int, sqe: SensisQueryElement, arr: String*): JSONObject = {
     QueryElementToJSON(compareBase(b, e, sqe, arr.toArray))
+  }
+
+  def queryTop(days: Int, top: Int, sqe: SensisQueryElement, arr: String*): JSONObject = {
+    val records = queryRecord(days, sqe, arr.toArray).orderbyDecsending(x => x.getProperty[Int]("days")).top(top)
+    QueryElementToJSON(records.toList)
+  }
+
+  def queryGrowth(b: Int, e: Int, sqe: SensisQueryElement, arr: String*): JSONObject = {
+    JSONObject(getQualityGrowth(b, e, sqe, arr.toArray))
   }
 
   private def queryAsSensisQueryElem(args: Array[String]): MongoDBObject => SensisQueryElement = x => {
@@ -59,7 +70,7 @@ object SearchQualityQuery extends SearchQualityQryTrait {
       for (it <- right.args) {
         if (it.name.toLowerCase.contains("comment"))
           result.insertProperty(it.name, if (it.get.toString.equals("")) "Undefined" else it.get.toString)
-        else if (it.name != "days"){
+        else if (it.name != "days") {
           result.insertProperty("%s_curr".format(it.name), if (it.get.toString.equals("")) "Undefined" else (it.get.toString).toDouble)
           result.insertProperty("%s_prev".format(it.name), if (left.getProperty(it.name).equals("")) "Undefined" else (left.getProperty(it.name).toString).toDouble)
           result.insertProperty("%s_change".format(it.name), calcChange(left.getProperty(it.name).toString, it.get.toString))
@@ -71,18 +82,41 @@ object SearchQualityQuery extends SearchQualityQryTrait {
     if (begin == 0 && end == 0) {
       val recordsList = (queryRecord(0, sqe, arr).orderbyDecsending(x => x.getProperty[Int]("days")).top(2)).toList
 
-      val result: SensisQueryElement = getComparison(recordsList(1), recordsList(0))
-      result :: List.empty[SensisQueryElement]
+      if (recordsList.size >= 2) {
+        val result: SensisQueryElement = getComparison(recordsList(1), recordsList(0))
+        result :: List.empty[SensisQueryElement]
+      } else
+        recordsList
 
     } else if (begin != 0 && end != 0) {
       val left = queryRecord(begin, sqe, arr).toList
       val right = queryRecord(end, sqe, arr).toList
 
-      val result: SensisQueryElement = getComparison(left(0), right(0))
-      result :: List.empty[SensisQueryElement]
+      if (left.size == 1 && right.size == 1) {
+        val result: SensisQueryElement = getComparison(left(0), right(0))
+        result :: List.empty[SensisQueryElement]
+      } else
+        right
 
     } else
       List.empty[SensisQueryElement]
+  }
+
+  private def getQualityGrowth(begin: Int, end: Int, sqe: SensisQueryElement, arr: Array[String]): Map[String, Any] = {
+
+    val sourceInput = sqe.getProperty[String]("source")
+    if ((sourceInput != null) && !sourceInput.equals("")) {
+      val fl: Array[String] = Array("days", "SAPI", "SAPI_Comment", "Yellow", "Yellow_Comment", "One_Search", "One_Search_Comment")
+      val records = from db () in SearchQualityDBName.search_quality_data where SplunkHelper.queryBetweenTimespanDB(begin, end) select queryAsSensisQueryElem(fl)
+
+      var dataMap: Map[String, Any] = Map.empty
+      for (it <- records) {
+        dataMap += (it.getProperty[Int]("days").toString -> it.getProperty[String]("%s".format(sourceInput)))
+      }
+      dataMap
+
+    } else Map.empty[String, String]
+
   }
 
 }

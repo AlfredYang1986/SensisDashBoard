@@ -23,4 +23,10 @@ object SearchQualityInsertDemo extends App {
   /* eval query demo*/
 //  println("queryyyyyyyyyyyyy   " + EvalQualityQuery.query(10302, new SensisQueryElement, "*"))
 //  println("commmmmmmmmm   " + EvalQualityQuery.compare(0, 0, new SensisQueryElement, "*"))
+  
+  /* Get quality growth */
+  val a = new SensisQueryElement
+  a.insertProperty("source", "SAPI")  
+  
+  println(SearchQualityQuery.queryGrowth(10299, 10301, a, "*"))
 } 
