@@ -10,7 +10,7 @@ import query.property.QueryElementToJSON
 
 object SplunkRequestQuery extends QueryTraits {
 	def isQueryable(property : String) : Boolean = false
-	
+
 	def query(b : Int, e : Int, p : SensisQueryElement, r : String*) : JSONObject = {
 	  	QueryElementToJSON(query_acc(b, e, p, r.toArray).toList)
 	}
@@ -19,24 +19,20 @@ object SplunkRequestQuery extends QueryTraits {
 	}
 	def queryTops(t : Int, b : Int, e : Int, p : SensisQueryElement, r : String*) : JSONObject = ???
 	def queryTopsWithQueryable(t : Int, b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement] = ???
-	
-<<<<<<< HEAD
-	def query_acc(b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement] = {
-=======
+
 	private def query_acc(b : Int, e : Int, p : SensisQueryElement, r : Array[String]) : IQueryable[SensisQueryElement] = {
->>>>>>> FETCH_HEAD
-		
+
 		def getFirstElement : String = p.getProperty[String]("first")
 		def getSecendElement : String = p.getProperty[String]("secend")
 
 		val first = getFirstElement
 		val secend = getSecendElement
-		
+
 		def getSearchInsightDBObject : MongoDBObject = {
 			val builder = MongoDBObject.newBuilder
 			builder += ("first" -> first)
 			builder += ("secend" -> secend)
-			
+
 			builder.result
 		}
 		def resultConditons : MongoDBObject => SensisQueryElement = { x => 
@@ -64,7 +60,7 @@ object SplunkRequestQuery extends QueryTraits {
 	  		}
 	  		else right
 	  	}
-	  	
+
 		if (first == null && secend == null) null
 		else {
 			var query : IQueryable[SensisQueryElement] = null
