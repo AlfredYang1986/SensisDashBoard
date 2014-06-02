@@ -8,7 +8,7 @@ import query.property.QueryElementToJSON
 import cache.SearchQualityDBName
 import scala.util.parsing.json.JSONObject
 
-object EvalQualityQuery {
+object EvalQualityQuery extends SearchQualityQryTrait {
 
   def query(days: Int, sqe: SensisQueryElement, arr: String*): JSONObject = {
     QueryElementToJSON((queryRecord(days, sqe, arr.toArray)).toList)
@@ -17,6 +17,13 @@ object EvalQualityQuery {
   def compare(begin: Int, end: Int, sqe: SensisQueryElement, arr: String*): JSONObject = {
     QueryElementToJSON(compareBase(begin, end, sqe, arr.toArray))
   }
+
+  def queryTop(days: Int, top: Int, sqe: SensisQueryElement, arr: String*): JSONObject = {
+    val records = queryRecord(days, sqe, arr.toArray).orderbyDecsending(x => x.getProperty[Int]("days")).top(10)
+    QueryElementToJSON(records.toList)
+  }
+
+  def queryGrowth(b: Int, e: Int, sqe: SensisQueryElement, arr: String*): JSONObject = ???
 
   private def queryAsSensisQueryElem(args: Array[String]): MongoDBObject => SensisQueryElement = x => {
     val reVal = new SensisQueryElement
@@ -33,7 +40,7 @@ object EvalQualityQuery {
 
     var fl: Array[String] = null
     if (arr.length == 1)
-      fl = Array("Name_Search", "Name_Search_Comment", "Type_Search", "Type_Search_Comment", "Concept_Recall", "Concept_Recall_Comment", "Duplicates","Duplicates_Comment", "Zero_Results", "Zero_Results_Comment")
+      fl = Array("Name_Search", "Name_Search_Comment", "Type_Search", "Type_Search_Comment", "Concept_Recall", "Concept_Recall_Comment", "Duplicates", "Duplicates_Comment", "Zero_Results", "Zero_Results_Comment")
     else
       fl = arr.toArray
 
@@ -71,15 +78,21 @@ object EvalQualityQuery {
     if (begin == 0 && end == 0) {
       val recordsList = (queryRecord(0, sqe, arr).orderbyDecsending(x => x.getProperty[Int]("days")).top(2)).toList
 
-      val result: SensisQueryElement = getComparison(recordsList(1), recordsList(0))
-      result :: List.empty[SensisQueryElement]
+      if (recordsList.size >= 2) {
+        val result: SensisQueryElement = getComparison(recordsList(1), recordsList(0))
+        result :: List.empty[SensisQueryElement]
+      } else
+        recordsList
 
     } else if (begin != 0 && end != 0) {
       val left = queryRecord(begin, sqe, arr).toList
       val right = queryRecord(end, sqe, arr).toList
 
-      val result: SensisQueryElement = getComparison(left(0), right(0))
-      result :: List.empty[SensisQueryElement]
+      if (left.size == 1 && right.size == 1) {
+        val result: SensisQueryElement = getComparison(left(0), right(0))
+        result :: List.empty[SensisQueryElement]
+      } else
+        right
 
     } else
       List.empty[SensisQueryElement]
