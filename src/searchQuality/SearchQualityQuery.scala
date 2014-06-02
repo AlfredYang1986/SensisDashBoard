@@ -1,14 +1,15 @@
 package searchQuality
 
-import query.property.SensisQueryElement
+import scala.util.parsing.json.JSONObject
+
 import com.mongodb.casbah.Imports._
-import query._
-import scala.util.parsing.json.JSONObject
-import query.property.QueryElementToJSON
+
 import cache.SearchQualityDBName
-import scala.util.parsing.json.JSONObject
+import query._
+import query.from
 import query.helper.SplunkHelper
-import scala.util.parsing.json.JSONObject
+import query.property.QueryElementToJSON
+import query.property.SensisQueryElement
 
 object SearchQualityQuery extends SearchQualityQryTrait {
 
@@ -25,6 +26,9 @@ object SearchQualityQuery extends SearchQualityQryTrait {
     QueryElementToJSON(records.toList)
   }
 
+  /**
+   * Retrieves the quality percentages for SAPI, over the defined time.
+   */
   def queryGrowth(b: Int, e: Int, sqe: SensisQueryElement, arr: String*): JSONObject = {
     JSONObject(getQualityGrowth(b, e, sqe, arr.toArray))
   }
@@ -44,7 +48,7 @@ object SearchQualityQuery extends SearchQualityQryTrait {
 
     var fl: Array[String] = null
     if (arr.length == 1)
-      fl = Array("days", "SAPI", "SAPI_Comment", "Yellow", "Yellow_Comment", "One_Search", "One_Search_Comment")
+      fl = SearchQualityDBName.search_quality_columns
     else
       fl = arr.toArray
 
@@ -57,6 +61,15 @@ object SearchQualityQuery extends SearchQualityQryTrait {
   }
 
   private def compareBase(begin: Int, end: Int, sqe: SensisQueryElement, arr: Array[String]): List[SensisQueryElement] = {
+
+    def getPreviousRecord(begin: Int) = {
+      val records = from db () in SearchQualityDBName.search_quality_data where ("days" $lt begin) select queryAsSensisQueryElem(SearchQualityDBName.search_quality_columns)
+      val prev = records.orderbyDecsending(x => x.getProperty[Int]("days")).top(1).toList
+
+      if (prev.size >= 1) prev(0)
+      else new SensisQueryElement
+    }
+
     def calcChange(left: String, right: String) = {
       if (left.equals("") || right.equals(""))
         "Quality values undefined"
@@ -79,7 +92,7 @@ object SearchQualityQuery extends SearchQualityQryTrait {
       result
     }
 
-    if (begin == 0 && end == 0) {
+    if (begin == 0 && end == 0) { /* Default view */
       val recordsList = (queryRecord(0, sqe, arr).orderbyDecsending(x => x.getProperty[Int]("days")).top(2)).toList
 
       if (recordsList.size >= 2) {
@@ -88,7 +101,7 @@ object SearchQualityQuery extends SearchQualityQryTrait {
       } else
         recordsList
 
-    } else if (begin != 0 && end != 0) {
+    } else if (begin != 0 && end != 0) { /* When both time points defined */
       val left = queryRecord(begin, sqe, arr).toList
       val right = queryRecord(end, sqe, arr).toList
 
@@ -98,15 +111,25 @@ object SearchQualityQuery extends SearchQualityQryTrait {
       } else
         right
 
+    } else if (begin != 0 && end == 0) { /* Only one time point */
+      val right = queryRecord(begin, sqe, arr).toList
+      val left = getPreviousRecord(begin)
+
+      if (right.size >= 1) getComparison(left, right(0)) :: List.empty[SensisQueryElement]
+      else List.empty[SensisQueryElement]
+
     } else
       List.empty[SensisQueryElement]
   }
 
+  /**
+   * Retrieves the quality percentages for SAPI, over the defined time.
+   */
   private def getQualityGrowth(begin: Int, end: Int, sqe: SensisQueryElement, arr: Array[String]): Map[String, Any] = {
 
     val sourceInput = sqe.getProperty[String]("source")
     if ((sourceInput != null) && !sourceInput.equals("")) {
-      val fl: Array[String] = Array("days", "SAPI", "SAPI_Comment", "Yellow", "Yellow_Comment", "One_Search", "One_Search_Comment")
+      val fl: Array[String] = SearchQualityDBName.search_quality_columns
       val records = from db () in SearchQualityDBName.search_quality_data where SplunkHelper.queryBetweenTimespanDB(begin, end) select queryAsSensisQueryElem(fl)
 
       var dataMap: Map[String, Any] = Map.empty
@@ -116,7 +139,6 @@ object SearchQualityQuery extends SearchQualityQryTrait {
       dataMap
 
     } else Map.empty[String, String]
-
   }
 
 }

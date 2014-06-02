@@ -1,8 +1,8 @@
 package searchQuality
 
 import scala.util.parsing.json.JSONObject
+
 import query.property.SensisQueryElement
-import scala.util.parsing.json.JSONObject
 
 trait SearchQualityQryTrait {
 

@@ -1,12 +1,15 @@
 package searchQuality
 
-import query.property.SensisQueryElement
-import com.mongodb.casbah.Imports._
-import query._
-import scala.util.parsing.json.JSONObject
-import query.property.QueryElementToJSON
 import cache.SearchQualityDBName
+
+import com.mongodb.casbah.Imports._
+
 import scala.util.parsing.json.JSONObject
+
+import query._
+import query.property.QueryElementToJSON
+import query.property.SensisQueryElement
+
 
 object EvalQualityQuery extends SearchQualityQryTrait {
 
@@ -53,6 +56,15 @@ object EvalQualityQuery extends SearchQualityQryTrait {
   }
 
   private def compareBase(begin: Int, end: Int, sqe: SensisQueryElement, arr: Array[String]): List[SensisQueryElement] = {
+
+    def getPreviousRecord(begin: Int) = {
+      val records = from db () in SearchQualityDBName.evaluation_matric_data where ("days" $lt begin) select queryAsSensisQueryElem(SearchQualityDBName.evaluation_matric_columns)
+      val prev = records.orderbyDecsending(x => x.getProperty[Int]("days")).top(1).toList
+
+      if (prev.size >= 1) prev(0)
+      else new SensisQueryElement
+    }
+
     def calcChange(left: String, right: String) = {
       if (left.equals("") || right.equals(""))
         "Quality values undefined"
@@ -75,7 +87,7 @@ object EvalQualityQuery extends SearchQualityQryTrait {
       result
     }
 
-    if (begin == 0 && end == 0) {
+    if (begin == 0 && end == 0) { /* Default view */
       val recordsList = (queryRecord(0, sqe, arr).orderbyDecsending(x => x.getProperty[Int]("days")).top(2)).toList
 
       if (recordsList.size >= 2) {
@@ -84,7 +96,7 @@ object EvalQualityQuery extends SearchQualityQryTrait {
       } else
         recordsList
 
-    } else if (begin != 0 && end != 0) {
+    } else if (begin != 0 && end != 0) { /* When both time points defined */
       val left = queryRecord(begin, sqe, arr).toList
       val right = queryRecord(end, sqe, arr).toList
 
@@ -93,6 +105,13 @@ object EvalQualityQuery extends SearchQualityQryTrait {
         result :: List.empty[SensisQueryElement]
       } else
         right
+
+    } else if (begin != 0 && end == 0) { /* Only one time point */
+      val right = queryRecord(begin, sqe, arr).toList
+      val left = getPreviousRecord(begin)
+
+      if (right.size >= 1) getComparison(left, right(0)) :: List.empty[SensisQueryElement]
+      else List.empty[SensisQueryElement]
 
     } else
       List.empty[SensisQueryElement]
