@@ -20,11 +20,9 @@ object SplunkRequestQuery extends QueryTraits {
 	def queryTops(t : Int, b : Int, e : Int, p : SensisQueryElement, r : String*) : JSONObject = ???
 	def queryTopsWithQueryable(t : Int, b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement] = ???
 	
-<<<<<<< HEAD
-	def query_acc(b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement] = {
-=======
+
 	private def query_acc(b : Int, e : Int, p : SensisQueryElement, r : Array[String]) : IQueryable[SensisQueryElement] = {
->>>>>>> FETCH_HEAD
+
 		
 		def getFirstElement : String = p.getProperty[String]("first")
 		def getSecendElement : String = p.getProperty[String]("secend")
