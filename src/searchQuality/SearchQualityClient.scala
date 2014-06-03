@@ -4,12 +4,11 @@
 package searchQuality
 
 import com.mongodb.casbah.Imports._
-import query._
 import com.mongodb.casbah.commons.MongoDBObject
+
 import cache.SearchQualityDBName
+import query._data_connection
 import query.property.SensisQueryElement
-import query.property.QueryElementToJSON
-import scala.util.parsing.json.JSONObject
 
 object SearchQualityClient {
 
@@ -35,7 +34,11 @@ object SearchQualityClient {
       else _data_connection.getCollection(SearchQualityDBName.search_quality_data)
     }
 
-    def getExistingRecord = getCollection.find(MongoDBObject("days" -> days))
+    def getExistingRecord = {
+      val collection = getCollection
+      collection.ensureIndex(DBObject("days" -> 1))
+      collection.find(MongoDBObject("days" -> days))
+    }
 
     var db = MongoDBObject.newBuilder
     db += ("days" -> days)
