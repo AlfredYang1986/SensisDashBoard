@@ -4,6 +4,8 @@ import query.from
 import scala.util.parsing.json.JSONArray
 import scala.util.parsing.json.JSONObject
 import query.QueryOrdering
+import query.BaseTimeSpan
+import java.util.Calendar
 
 class SensisQueryElement {
 	var args : List[Property] = Nil
@@ -29,7 +31,15 @@ class SensisQueryElement {
 	
 	def toJSONMap : JSONObject = {
 	  	var mp = Map.empty[String, Any]
-	  	for (arg <- args) mp += (arg.name -> arg.get)
+	  	for (arg <- args) {
+	  		if (arg.name != "days") mp += (arg.name -> arg.get)
+	  		else {
+	  			val cal = Calendar.getInstance()
+	  			cal.setTime(BaseTimeSpan.base)
+	  			cal.add(Calendar.DATE, arg.get.asInstanceOf[Int])
+	  			mp += ("days" -> cal.toString())
+	  		}
+	  	}
 	  	new JSONObject(mp)
 	}
 	
