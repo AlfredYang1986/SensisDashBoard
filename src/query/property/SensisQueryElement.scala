@@ -6,6 +6,7 @@ import scala.util.parsing.json.JSONObject
 import query.QueryOrdering
 import query.BaseTimeSpan
 import java.util.Calendar
+import java.text.SimpleDateFormat
 
 class SensisQueryElement {
 	var args : List[Property] = Nil
@@ -37,7 +38,7 @@ class SensisQueryElement {
 	  			val cal = Calendar.getInstance()
 	  			cal.setTime(BaseTimeSpan.base)
 	  			cal.add(Calendar.DATE, arg.get.asInstanceOf[Int])
-	  			mp += ("days" -> cal.toString())
+	  			mp += "days" -> new SimpleDateFormat("MM/dd/yyyy").format(cal.getTime())
 	  		}
 	  	}
 	  	new JSONObject(mp)
