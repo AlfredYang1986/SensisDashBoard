@@ -1,11 +1,4 @@
 <Services>
-	<administrators>
-		<administrator name="Pete" password="***"/>
-		<administrator name="Andrew" password="***"/>
-		<administrator name="Karl" password="***"/>
-		<administrator name="Willy" password="***"/>
-	</administrators>
-
 	<Service name="Splunk" url="http://localhost:8089" resultHandle="SplunkXML" >
 		<key factory="SplunkKey">
 			<arg name="username" value="admin" />

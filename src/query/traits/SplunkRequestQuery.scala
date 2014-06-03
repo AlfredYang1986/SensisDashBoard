@@ -12,7 +12,7 @@ object SplunkRequestQuery extends QueryTraits {
 	def isQueryable(property : String) : Boolean = false
 	
 	def query(b : Int, e : Int, p : SensisQueryElement, r : String*) : JSONObject = {
-	  	QueryElementToJSON(query_acc(b, e, p, r.toArray).toList)
+		QueryElementToJSON(query_acc(b, e, p, r.toArray).toList)
 	}
 	def queryWithQueryable(b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement] = {
 		query_acc(b, e, p, r.toArray)
@@ -28,10 +28,11 @@ object SplunkRequestQuery extends QueryTraits {
 		val first = getFirstElement
 		val secend = getSecendElement
 		
-		def getSearchInsightDBObject : MongoDBObject = {
+		def getSearchInsightDBObject : DBObject = {
 			val builder = MongoDBObject.newBuilder
-			builder += ("first" -> first)
-			builder += ("secend" -> secend)
+			
+			if (first != null) builder += ("first" -> first)
+			if (secend != null) builder += ("secend" -> secend)
 			
 			builder.result
 		}

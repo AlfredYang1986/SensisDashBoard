@@ -143,7 +143,10 @@ class Linq_List[T] extends IQueryable[T] {
 	 	val nc = new Linq_List[T]
 		var ncoll : List[T] = Nil//new Linq_List[T]
 		
-		for (it <- this) {
+		val dis_1 = (from[T] in coll select (x => x)).toList.distinct //union (from[T] in that.toList select (g)).toList.distinct
+		val dis_2 = (from[T] in that.toList select (x => x)).toList.distinct
+		val dis = (dis_1 union dis_2).distinct
+		for (it <- dis) {
 			val l = (from[T] in coll select (x => x)).fistOrDefault
 			val r = (from[T] in that.toList select (x => x)).fistOrDefault
 	
