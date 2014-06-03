@@ -4,12 +4,11 @@
 package searchQuality
 
 import com.mongodb.casbah.Imports._
-import query._
 import com.mongodb.casbah.commons.MongoDBObject
+
 import cache.SearchQualityDBName
+import query._data_connection
 import query.property.SensisQueryElement
-import query.property.QueryElementToJSON
-import scala.util.parsing.json.JSONObject
 
 object SearchQualityClient {
 
@@ -25,8 +24,8 @@ object SearchQualityClient {
    * @param dataMap - Data inserted via interface, as key-value pairs
    * @return
    */
-  def delete(days: Int, dataMap: Map[String, Any]): Boolean = {
-    deleteRecord(days, dataMap)
+  def delete(days: Int, sqe: SensisQueryElement): Boolean = {
+    deleteRecord(days, sqe)
   }
 
   private def addOrUpdate(days: Int, dataMap: Map[String, Any]): Boolean = {
@@ -35,7 +34,11 @@ object SearchQualityClient {
       else _data_connection.getCollection(SearchQualityDBName.search_quality_data)
     }
 
-    def getExistingRecord = getCollection.find(MongoDBObject("days" -> days))
+    def getExistingRecord = {
+      val collection = getCollection
+      collection.ensureIndex(DBObject("days" -> 1))
+      collection.find(MongoDBObject("days" -> days))
+    }
 
     var db = MongoDBObject.newBuilder
     db += ("days" -> days)
@@ -54,17 +57,19 @@ object SearchQualityClient {
     }
   }
 
-  private def deleteRecord(days: Int, dataMap: Map[String, Any]): Boolean = {
+  private def deleteRecord(days: Int, sqe: SensisQueryElement): Boolean = {
     def getCollection = {
-      if (dataMap.size > 7) _data_connection.getCollection(SearchQualityDBName.evaluation_matric_data)
+      if (sqe.getProperty[String]("collection").equalsIgnoreCase("eval")) _data_connection.getCollection(SearchQualityDBName.evaluation_matric_data)
       else _data_connection.getCollection(SearchQualityDBName.search_quality_data)
     }
 
-    try {
-      getCollection.remove(MongoDBObject("days" -> days))
-      true
-    } catch {
-      case e: MongoException => false
-    }
+    if ((sqe != null) && (sqe.getProperty[String]("collection") != null)) {
+      try {
+        getCollection.remove(MongoDBObject("days" -> days))
+        true
+      } catch {
+        case e: MongoException => false
+      }
+    } else false
   }
 }

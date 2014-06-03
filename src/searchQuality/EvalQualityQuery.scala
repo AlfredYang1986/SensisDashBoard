@@ -1,14 +1,17 @@
 package searchQuality
 
-import query.property.SensisQueryElement
-import com.mongodb.casbah.Imports._
-import query._
-import scala.util.parsing.json.JSONObject
-import query.property.QueryElementToJSON
 import cache.SearchQualityDBName
+
+import com.mongodb.casbah.Imports._
+
 import scala.util.parsing.json.JSONObject
 
-object EvalQualityQuery {
+import query._
+import query.property.QueryElementToJSON
+import query.property.SensisQueryElement
+
+
+object EvalQualityQuery extends SearchQualityQryTrait {
 
   def query(days: Int, sqe: SensisQueryElement, arr: String*): JSONObject = {
     QueryElementToJSON((queryRecord(days, sqe, arr.toArray)).toList)
@@ -17,6 +20,13 @@ object EvalQualityQuery {
   def compare(begin: Int, end: Int, sqe: SensisQueryElement, arr: String*): JSONObject = {
     QueryElementToJSON(compareBase(begin, end, sqe, arr.toArray))
   }
+
+  def queryTop(days: Int, top: Int, sqe: SensisQueryElement, arr: String*): JSONObject = {
+    val records = queryRecord(days, sqe, arr.toArray).orderbyDecsending(x => x.getProperty[Int]("days")).top(10)
+    QueryElementToJSON(records.toList)
+  }
+
+  def queryGrowth(b: Int, e: Int, sqe: SensisQueryElement, arr: String*): JSONObject = ???
 
   private def queryAsSensisQueryElem(args: Array[String]): MongoDBObject => SensisQueryElement = x => {
     val reVal = new SensisQueryElement
@@ -33,7 +43,7 @@ object EvalQualityQuery {
 
     var fl: Array[String] = null
     if (arr.length == 1)
-      fl = Array("Name_Search", "Name_Search_Comment", "Type_Search", "Type_Search_Comment", "Concept_Recall", "Concept_Recall_Comment", "Duplicates","Duplicates_Comment", "Zero_Results", "Zero_Results_Comment")
+      fl = Array("Name_Search", "Name_Search_Comment", "Type_Search", "Type_Search_Comment", "Concept_Recall", "Concept_Recall_Comment", "Duplicates", "Duplicates_Comment", "Zero_Results", "Zero_Results_Comment")
     else
       fl = arr.toArray
 
@@ -46,6 +56,15 @@ object EvalQualityQuery {
   }
 
   private def compareBase(begin: Int, end: Int, sqe: SensisQueryElement, arr: Array[String]): List[SensisQueryElement] = {
+
+    def getPreviousRecord(begin: Int) = {
+      val records = from db () in SearchQualityDBName.evaluation_matric_data where ("days" $lt begin) select queryAsSensisQueryElem(SearchQualityDBName.evaluation_matric_columns)
+      val prev = records.orderbyDecsending(x => x.getProperty[Int]("days")).top(1).toList
+
+      if (prev.size >= 1) prev(0)
+      else new SensisQueryElement
+    }
+
     def calcChange(left: String, right: String) = {
       if (left.equals("") || right.equals(""))
         "Quality values undefined"
@@ -68,18 +87,31 @@ object EvalQualityQuery {
       result
     }
 
-    if (begin == 0 && end == 0) {
+    if (begin == 0 && end == 0) { /* Default view */
       val recordsList = (queryRecord(0, sqe, arr).orderbyDecsending(x => x.getProperty[Int]("days")).top(2)).toList
 
-      val result: SensisQueryElement = getComparison(recordsList(1), recordsList(0))
-      result :: List.empty[SensisQueryElement]
+      if (recordsList.size >= 2) {
+        val result: SensisQueryElement = getComparison(recordsList(1), recordsList(0))
+        result :: List.empty[SensisQueryElement]
+      } else
+        recordsList
 
-    } else if (begin != 0 && end != 0) {
+    } else if (begin != 0 && end != 0) { /* When both time points defined */
       val left = queryRecord(begin, sqe, arr).toList
       val right = queryRecord(end, sqe, arr).toList
 
-      val result: SensisQueryElement = getComparison(left(0), right(0))
-      result :: List.empty[SensisQueryElement]
+      if (left.size == 1 && right.size == 1) {
+        val result: SensisQueryElement = getComparison(left(0), right(0))
+        result :: List.empty[SensisQueryElement]
+      } else
+        right
+
+    } else if (begin != 0 && end == 0) { /* Only one time point */
+      val right = queryRecord(begin, sqe, arr).toList
+      val left = getPreviousRecord(begin)
+
+      if (right.size >= 1) getComparison(left, right(0)) :: List.empty[SensisQueryElement]
+      else List.empty[SensisQueryElement]
 
     } else
       List.empty[SensisQueryElement]
