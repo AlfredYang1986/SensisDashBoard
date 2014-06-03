@@ -38,7 +38,7 @@ class SensisQueryElement {
 	  			val cal = Calendar.getInstance()
 	  			cal.setTime(BaseTimeSpan.base)
 	  			cal.add(Calendar.DATE, arg.get.asInstanceOf[Int])
-	  			mp += "days" -> new SimpleDateFormat("MM/dd/yyyy").format(cal.getTime())
+	  			mp += "days" -> new SimpleDateFormat("yyyy-MM-dd").format(cal.getTime())
 	  		}
 	  	}
 	  	new JSONObject(mp)
