@@ -31,6 +31,20 @@ object SplunkQueryHelper {
 	  		else right
 	  	}
 	
+	def unionRequestResult[T](prep : SensisQueryElement => T)(left : IQueryable[SensisQueryElement], right : IQueryable[SensisQueryElement])  : IQueryable[SensisQueryElement] = 
+	  	if (left != null) left.union(right)(prep) { (x, y) => 
+	  		if (x == null) y
+	  		else if (y == null) x
+	  		else {
+	  			val re = new SensisQueryElement
+	  			re.insertProperty("first", x.getProperty[String]("first"))
+	  			re.insertProperty("secend", x.getProperty[String]("secend"))
+	  			re.insertProperty("times", x.getProperty[Int]("times") + y.getProperty[Int]("times"))
+	  			re
+	  		}
+	  	}
+	  	else right
+	
 	/**
 	 * @left	: previous query
 	 * @right	: current  query
