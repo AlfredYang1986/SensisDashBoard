@@ -4,8 +4,8 @@ import query.from
 import scala.util.parsing.json.JSONArray
 import scala.util.parsing.json.JSONObject
 import query.QueryOrdering
-import query.BaseTimeSpan
 import java.util.Calendar
+import query.BaseTimeSpan
 import java.text.SimpleDateFormat
 
 class SensisQueryElement {

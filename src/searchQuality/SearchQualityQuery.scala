@@ -1,15 +1,15 @@
 package searchQuality
 
 import scala.util.parsing.json.JSONObject
-
 import com.mongodb.casbah.Imports._
-
 import cache.SearchQualityDBName
 import query._
 import query.from
 import query.helper.SplunkHelper
 import query.property.QueryElementToJSON
 import query.property.SensisQueryElement
+import java.util.Calendar
+import java.text.SimpleDateFormat
 
 object SearchQualityQuery extends SearchQualityQryTrait {
 
@@ -134,7 +134,11 @@ object SearchQualityQuery extends SearchQualityQryTrait {
 
       var dataMap: Map[String, Any] = Map.empty
       for (it <- records) {
-        dataMap += (it.getProperty[Int]("days").toString -> it.getProperty[String]("%s".format(sourceInput)))
+        val cal = Calendar.getInstance()
+	  	cal.setTime(BaseTimeSpan.base)
+	  	cal.add(Calendar.DATE, (it.getProperty[Int]("days")))
+	  	
+        dataMap += (new SimpleDateFormat("yyyy-MM-dd").format(cal.getTime()) -> it.getProperty[String]("%s".format(sourceInput)))
       }
       dataMap
 
