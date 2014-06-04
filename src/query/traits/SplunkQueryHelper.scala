@@ -2,6 +2,7 @@ package query.traits
 
 import query.IQueryable
 import query.property.SensisQueryElement
+import query.Linq_List
 
 object SplunkQueryHelper {
 	def unionResultBaseOnUser(left : IQueryable[SensisQueryElement], right : IQueryable[SensisQueryElement], fl : Array[String]) : IQueryable[SensisQueryElement] = {
@@ -45,6 +46,40 @@ object SplunkQueryHelper {
 	  	}
 	  	else right
 	
+	def unionRequestQueryCounts(query : IQueryable[SensisQueryElement]) : IQueryable[SensisQueryElement] = {
+	  	val reVal = new Linq_List[SensisQueryElement]
+	  	var reColl : List[SensisQueryElement] = Nil
+	  	var times : Int = 0
+	  	for (it <- query) {
+	  		val tmp = it.getProperty[String]("secend")
+	  		if (tmp.toInt < 10) reColl = reColl :+ it 
+	  		else times = times + it.getProperty[Int]("times")
+	  	}
+	  	
+	  	val other = new SensisQueryElement
+	  	other.insertProperty("first", query.toList.head.getProperty[String]("first"))
+	  	other.insertProperty("secend", "others")
+	  	other.insertProperty("times", times)
+	  	
+	  	reColl = reColl :+ other
+	  	reVal.coll = reColl
+	  	reVal
+	}
+	
+	def count2String(c : String, p : SensisQueryElement) : String = 
+	  if (p.contains("line") && p.getProperty[String]("first") == "queryCount") c match {
+	  	case "1" => "one"
+	  	case "2" => "two"
+	  	case "3" => "three"
+	  	case "4" => "four"
+	  	case "5" => "five"
+	  	case "6" => "six"
+	  	case "7" => "seven"
+	  	case "8" => "eight"
+	  	case "9" => "nine"
+	  	case _ => "others" 
+	  } else c
+	  	
 	/**
 	 * @left	: previous query
 	 * @right	: current  query

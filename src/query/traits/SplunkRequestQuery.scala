@@ -13,20 +13,22 @@ object SplunkRequestQuery extends QueryTraits {
 	def isQueryable(property : String) : Boolean = false
 	
 	def query(b : Int, e : Int, p : SensisQueryElement, r : String*) : JSONObject = {
-		if (p.contains("pie")) 
-			QueryElementToJSON(query_acc(b, e, p, r.toArray)
-			    (SplunkQueryHelper.unionRequestResult(x => x.getProperty[String]("first") + x.getProperty[String]("secend"))).toList)
+		var tmp = query_acc_with_queryable(b, e, p, r.toArray)
+		if (p.contains("pie")) {
+			if (p.getProperty[String]("first") == "queryCount")  QueryElementToJSON(SplunkQueryHelper.unionRequestQueryCounts(tmp).toList)
+			else QueryElementToJSON(tmp.toList)
+		}
 		else if (p.contains("line")) {
-			val tmp = query_acc_with_queryable(b, e, p, r.toArray)
+			if (p.getProperty[String]("first") == "queryCount")  tmp = SplunkQueryHelper.unionRequestQueryCounts(tmp)
 
 			var re : Map[String, JSONArray] = Map.empty
 			val dis = tmp.distinctBy(x => x.getProperty[String]("secend")).toList.distinct
 			for (sec <- dis) {
 				var reVal : List[JSONObject] = Nil
-				val xs = from[SensisQueryElement] in tmp.toList where (x => x.getProperty[String]("secend") == sec) select (x =>x)
+				val xs = from[SensisQueryElement] in tmp.toList where (x => x.getProperty[String]("secend") == sec) select (x => x)
 				for (it <- xs) reVal = reVal :+ (it.toJSONMap)
 				
-				re += sec -> new JSONArray(reVal)
+				re += SplunkQueryHelper.count2String(sec, p) -> new JSONArray(reVal)
 			}
 			
 			new JSONObject(re)
