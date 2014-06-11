@@ -10,6 +10,7 @@ import query.property.QueryElementToJSON
 import query.property.SensisQueryElement
 import java.util.Calendar
 import java.text.SimpleDateFormat
+import scala.collection.immutable.TreeMap
 
 object SearchQualityQuery extends SearchQualityQryTrait {
 
@@ -132,7 +133,7 @@ object SearchQualityQuery extends SearchQualityQryTrait {
       val fl: Array[String] = SearchQualityDBName.search_quality_columns
       val records = from db () in SearchQualityDBName.search_quality_data where SplunkHelper.queryBetweenTimespanDB(begin, end) select queryAsSensisQueryElem(fl)
 
-      var dataMap: Map[String, Any] = Map.empty
+      var dataMap: TreeMap[String, Any] = TreeMap.empty
       for (it <- records) {
         val cal = Calendar.getInstance()
 	  	cal.setTime(BaseTimeSpan.base)
@@ -142,7 +143,7 @@ object SearchQualityQuery extends SearchQualityQryTrait {
       }
       dataMap
 
-    } else Map.empty[String, String]
+    } else TreeMap.empty[String, String]
   }
 
 }
