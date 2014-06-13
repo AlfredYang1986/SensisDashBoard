@@ -14,7 +14,6 @@ import query._
 import com.mongodb.casbah.Imports._
 import cache.SplunkCacheFacade
 import query.property.SensisQueryElement
-import com.sun.xml.internal.bind.v2.schemagen.Term
 
 trait state {
 	def name : String
