@@ -1,15 +1,16 @@
 <Services>
-	<Service name="Splunk" url="http://localhost:8089" resultHandle="SplunkXML" >
-		<key factory="SplunkKey">
-			<arg name="username" value="admin" />
-			<arg name="password" value="Abcde196125" />
-			<arg name="host" value="localhost" />
-			<arg name="port" value="8089" />
-		</key>
+	<Service resultHandle="MasheryJSON" url="http://api.mashery.com/v2/json-rpc/248?" name="Mashery"> 
+		<key factory="MasheryKey">
+			<arg name="key" value="guk5rz7ppws5gua83ydqguyj"/> 
+			<arg name="secret" value="SMuM465JJG"/> 
+			<urlName name="apikey" delegate="copy(key)"/> 
+			<urlName name="sig" delegate="md5(key,secret,time)"/> 
+		</key> 
 		
-		<query factory="SplunkApiQuery" >
-			<arg type="String" name="method" value="search" />
-			<arg type="String" name="duration" value="test" />
-		</query>
+		<query factory="JOSN-RPC"> 
+			<arg name="method" value="object.query" type="String"/> 
+			<arg name="params" value="SELECT * FROM members PAGE %d" type="StringList"/> 
+			<arg name="id" value="1" type="Int"/> 
+		</query> 
 	</Service>
 </Services>
