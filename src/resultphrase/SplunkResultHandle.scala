@@ -14,6 +14,7 @@ import query._
 import com.mongodb.casbah.Imports._
 import cache.SplunkCacheFacade
 import query.property.SensisQueryElement
+import com.sun.xml.internal.bind.v2.schemagen.Term
 
 trait state {
 	def name : String
@@ -66,7 +67,7 @@ object SplunkResultHandle extends ResultHandle {
 	def apply_acc(result : String) = {
 		def getUserKey(mp: Map[String, String]): String =
 			mp.get("key") match {
-			  case Some(e) => e
+			  case Some(e) => if (e.contains(' ')) e.substring(0, e.indexOf(' ')).trim else e.trim
 			  case none => "Unknown_User"
 			}
 		
