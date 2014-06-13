@@ -6,3 +6,6 @@ backup
 data
 MongoDBTest/bin
 SplunkDemo/bin
+src/unit_test
+src/util
+StructFile
