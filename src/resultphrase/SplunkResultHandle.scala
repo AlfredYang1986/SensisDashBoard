@@ -66,7 +66,7 @@ object SplunkResultHandle extends ResultHandle {
 	def apply_acc(result : String) = {
 		def getUserKey(mp: Map[String, String]): String =
 			mp.get("key") match {
-			  case Some(e) => if (e.contains(' ')) e.substring(0, e.indexOf(' ')).trim else e.trim
+			  case Some(e) => if (e.contains(' ')) e.substring(0, e.indexOf(' ')).trim() else e
 			  case none => "Unknown_User"
 			}
 		
@@ -126,13 +126,16 @@ object SplunkResultHandle extends ResultHandle {
 				val days = getCallDays(getDateString(field.text))
 				val mp = phraseArguments(raw)
 				val user_key = getUserKey(mp)
-				val method_name = phraseMethodName(raw).replace('.', '_')
 				
-				cache(fromYelloPage(user_key)).addRecord(days, user_key, method_name)
-				cache("endpoint").addRecord(days, user_key, method_name)
+				if (user_key != "Unknown_User"){
+					val method_name = phraseMethodName(raw).replace('.', '_')
 				
-				if (method_name.equals("search"))
-					addQueryLocationPair(mp, days)
+					cache(fromYelloPage(user_key)).addRecord(days, user_key, method_name)
+					cache("endpoint").addRecord(days, user_key, method_name)
+				
+					if (method_name.equals("search"))
+						addQueryLocationPair(mp, days)
+				}
 			}
 		}
 	}

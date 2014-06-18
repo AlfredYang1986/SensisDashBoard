@@ -10,13 +10,12 @@ object SplunkRequestProxy extends SplunkProxyBase {
 		
 	def source_type : String = "sourcetype=request.log"
 	override def getStartDate(duration : String) : Date = duration match {
-		case "test" => date_format.parse("05/13/2014:03:35:00")
+		case "test" => date_format.parse("05/03/2014:03:35:00")
 		case _ => super.getStartDate(duration)
 	}
 		
 	override def getEndDate(duration : String) : Date = duration match {
-		case "test" => date_format.parse("05/14/2014:03:15:00")
-//		case "test" => date_format.parse("05/13/2014:04:15:00")
+		case "test" => date_format.parse("05/20/2014:03:15:00")
 		case _ => super.getEndDate(duration)
 	}
 	

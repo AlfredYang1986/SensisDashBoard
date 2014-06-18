@@ -18,15 +18,22 @@ abstract class SplunkProxyBase extends APIProxy {
 	def source_type : String
 	val date_format : SimpleDateFormat = new SimpleDateFormat("MM/dd/yyyy:HH:mm:ss")
 	val service = Service.connect(SplunkKey.loginArgs)
-		
+	
+	val year_pattern_p = new scala.util.matching.Regex("""(\d+)y""", "num")
+	val month_pattern_p = new scala.util.matching.Regex("""(\d+)m""", "num")
+	val day_pattern_p = new scala.util.matching.Regex("""(\d+)d""", "num")
+	val week_pattern_p = new scala.util.matching.Regex("""(\d+)w""", "num")
+	
 	def getStartDate(duration : String) : Date = duration match {
-		case "month" => val cal = Calendar.getInstance(); cal.setTime(new Date()); cal.add(Calendar.MONTH, -1); cal.getTime
-		case _ => throw Error_PhraseXML
+	  case day_pattern_p(num) => val cal = Calendar.getInstance(); cal.setTime(new Date()); cal.add(Calendar.DATE, -Integer.parseInt(num)); cal.getTime 
+	  case month_pattern_p(num) => val cal = Calendar.getInstance(); cal.setTime(new Date()); cal.add(Calendar.MONTH, -Integer.parseInt(num)); cal.getTime 
+	  case year_pattern_p(num) => val cal = Calendar.getInstance(); cal.setTime(new Date()); cal.add(Calendar.YEAR, -Integer.parseInt(num)); cal.getTime 
+	  case week_pattern_p(num) => val cal = Calendar.getInstance(); cal.setTime(new Date()); cal.add(Calendar.WEEK_OF_YEAR, -Integer.parseInt(num)); cal.getTime 
+	  case _ => throw Error_PhraseXML
 	}
 		
 	def getEndDate(duration : String) : Date = duration match {
-		case "month" => val cal = Calendar.getInstance(); cal.setTime(new Date()); cal.getTime
-		case _ => throw Error_PhraseXML
+		case _ => val cal = Calendar.getInstance(); cal.setTime(new Date()); cal.getTime
 	}
 	
 	def getSearchString(begin : Date, end : Date) : String = {
