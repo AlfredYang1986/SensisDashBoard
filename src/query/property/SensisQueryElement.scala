@@ -59,6 +59,18 @@ class SensisQueryElement {
 	  	splitAcc(this.args)
 	}
 	
+	def union(right : SensisQueryElement, filterProperty : String*) : SensisQueryElement = {
+	  	if (right == null) this
+	  	else {
+	  	  for (it <- right) {
+	  		  if (!filterProperty.contains(it.name))
+	  			  if (this.contains(it.name)) this.insertProperty(it.name, this.getProperty[Int](it.name) + right.getProperty[Int](it.name))
+	  			  else this.insertProperty(it.name, right.getProperty[Int](it.name))
+	  	  }
+	  	  this 
+	  	}
+	}
+	
 	def orderValue : SensisQueryElement = {
 		val re = new SensisQueryElement
 		re.args = args.sortBy(x => x.get.asInstanceOf[Int])(new QueryOrdering[Int])
