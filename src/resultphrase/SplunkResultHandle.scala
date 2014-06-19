@@ -66,7 +66,7 @@ object SplunkResultHandle extends ResultHandle {
 	def apply_acc(result : String) = {
 		def getUserKey(mp: Map[String, String]): String =
 			mp.get("key") match {
-			  case Some(e) => if (e.contains(' ')) e.substring(0, e.indexOf(' ')).trim() else e
+			  case Some(e) => if (e.contains(' ')) e.substring(0, e.indexOf(' ')).trim else e.trim
 			  case none => "Unknown_User"
 			}
 		
@@ -74,7 +74,7 @@ object SplunkResultHandle extends ResultHandle {
 			new DateTime(new SimpleDateFormat("dd/MMM/yyyy").parse(date))).getDays()
 
 		def getDateString(raw: String): String =
-			raw.substring(raw.indexOf('[') + 1, raw.indexOf(']')).substring(0, raw.indexOf(' '))
+			raw.substring(raw.indexOf('[') + 1, raw.indexOf(']')).substring(0, raw.indexOf(':') - raw.indexOf('['))
 
 		def getFunctionString(raw: String): String = raw.substring(raw.indexOf('"'), raw.lastIndexOf('"'))
 
