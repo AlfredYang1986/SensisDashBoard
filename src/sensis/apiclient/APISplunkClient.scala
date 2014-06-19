@@ -20,7 +20,7 @@ import java.util.Calendar
 
 object SplunkProxy extends SplunkProxyBase {
   
-	def source_type : String = "sourcetype=access_common"
+	def source_type : String = "sourcetype=access_combined"
   	override def getStartDate(duration : String) : Date = duration match {
 		case "test" => date_format.parse("03/31/2014:03:00:00")
 		case _ => super.getStartDate(duration)
