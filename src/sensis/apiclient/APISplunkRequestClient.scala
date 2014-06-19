@@ -8,7 +8,7 @@ import java.util.Date
 
 object SplunkRequestProxy extends SplunkProxyBase {
 		
-	def source_type : String = "sourcetype=request.log"
+	def source_type : String = "sourcetype=app_api_request"
 	override def getStartDate(duration : String) : Date = duration match {
 		case "test" => date_format.parse("05/03/2014:03:35:00")
 		case _ => super.getStartDate(duration)
