@@ -16,6 +16,7 @@ import com.splunk.JobResultsPreviewArgs
 abstract class SplunkProxyBase extends APIProxy {
   
 	def source_type : String
+	def index : String
 	val date_format : SimpleDateFormat = new SimpleDateFormat("MM/dd/yyyy:HH:mm:ss")
 	val service = Service.connect(SplunkKey.loginArgs)
 	
@@ -36,9 +37,8 @@ abstract class SplunkProxyBase extends APIProxy {
 		case _ => val cal = Calendar.getInstance(); cal.setTime(new Date()); cal.getTime
 	}
 	
-	def getSearchString(begin : Date, end : Date) : String = {
-		"search %s earliest=\"" + date_format.format(begin) + "\" latest=\"" + date_format.format(end) + "\"".format(source_type)
-	}
+	def getSearchString(begin : Date, end : Date) : String = 
+        	("search %s %s earliest=\"" + date_format.format(begin) + "\" latest=\"" + date_format.format(end) + "\"").format(index, source_type)
 		
 	def HandleSplunkDateWithJobs(begin : Date, end : Date) : Unit = {
 		println("Start")
@@ -74,9 +74,7 @@ abstract class SplunkProxyBase extends APIProxy {
 		val search = getSearchString(begin, end)
 			
 		try {
-			callback(IOUtils.toString(service.export(
-					"search earliest=\"" + date_format.format(begin) + "\" latest=\"" + 
-				    date_format.format(end) + "\"")))
+			callback(IOUtils.toString(service.export(getSearchString(begin, end))))
 			} catch {
 			  case ex : OutOfMemoryError => HandleSplunkDateWithJobs(begin, end)
 			}
