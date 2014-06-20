@@ -20,6 +20,12 @@ object _data_connection {
 		
 		_conntion.get(coll_name).get
 	}
+	
+	def resetCollection(coll_name : String) : Unit = getCollection(coll_name).drop
+	
+	def isExisted(coll_name : String) : Boolean = getCollection(coll_name).isEmpty
+	
+	def releaseConntions = _conntion = Map.empty
 }
 
 trait IDatabaseContext {
