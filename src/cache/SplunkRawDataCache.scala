@@ -15,7 +15,8 @@ object SplunkRawDataCache extends SplunkCache{
 	def clearCache = impl.clearCache
 	def synchonaizeCache = {
 		val database = SplunkDatabaseName.splunk_raw_data.format(impl.days)
-		_data_connection.getCollection(database).remove(MongoDBObject("yello" -> false))
+		//_data_connection.getCollection(database).dropWhile(x => x.get("yello") == false)
+		if (_data_connection.isExisted(database)) _data_connection.resetCollection(database)
 		
 		if (!isClean) {
 			// cache all the one day data in one day 
