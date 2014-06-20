@@ -17,6 +17,8 @@ object SplunkQueryLocationCache extends SplunkCache {
 	def clearCache = ql = Map.empty
 	def synchonaizeCache = {
 		val database = SplunkDatabaseName.splunk_query_data.format(days)
+		if (_data_connection.isExisted(database)) _data_connection.resetCollection(database)
+		
 		if (!isClean) {
 			// cache all the one day data in one day 
 			var it = ql.iterator
