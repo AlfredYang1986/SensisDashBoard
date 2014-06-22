@@ -4,6 +4,7 @@
 <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/"
 	debug="true">
 
+	<!-- Logging to server console -->
 	<appender name="console" class="org.apache.log4j.ConsoleAppender">
 		<param name="Target" value="System.out" />
 		<layout class="org.apache.log4j.PatternLayout">
@@ -11,12 +12,9 @@
 		</layout>
 	</appender>
 
+	<!-- Logging into log files -->
 	<appender name="ROLL" class="org.apache.log4j.rolling.RollingFileAppender">
 		<!-- The active file to log to -->
-		<param name="file" value="logs\\myApache.log" />
-		<!--<param name="append" value="true" />
-		<param name="encoding" value="UTF-8" /> -->
-
 		<rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
 			<param name="FileNamePattern" value="logs\\myApache.%d{yyyy-MM-dd}.log.gz" />
 		</rollingPolicy>
@@ -26,12 +24,7 @@
 			<param name="ConversionPattern" value="%d %-5p %c{1} - %m%n" />
 		</layout>
 	</appender>
-	<!-- <appender name="fileAppender" class="org.apache.log4j.RollingFileAppender"> 
-		<param name="Threshold" value="INFO" /> <param name="File" value="sample.log"/> 
-		<layout class="org.apache.log4j.PatternLayout"> <param name="ConversionPattern" 
-		value="%d %-5p [%c{1}] %m %n" /> </layout> </appender> <logger name="javabeat.net.log4j" 
-		additivity="false" > <level value="INFO" /> <appender-ref ref="consoleAppender"/> 
-		<appender-ref ref="fileAppender"/> </logger> -->
+	
 	<root>
 		<priority value="debug" />
 		<appender-ref ref="console" />
