@@ -45,7 +45,7 @@ object SplunkRequestJSONHandle extends ResultHandle {
 			}
 		}
 		
-		def details = List( "intent", "granularity", "queryCount", "correctlySpelled", "metroExpansionDone" )
+		def details = List( "intent", "granularity", "queryCount", "correctlySpelled", "metroExpansionDone", "conceptSource" )
 		
 		println("Storing Splunk Request Data ... ")
 		(scala.xml.XML.loadString("<root>" + result.substring(result.indexOf("?>") + 2) + "</root>") \\ "result" \ "field").map { field =>
