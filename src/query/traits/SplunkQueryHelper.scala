@@ -1,8 +1,8 @@
 package query.traits
 
-import query.IQueryable
+import query._
 import query.property.SensisQueryElement
-import query.Linq_List
+import com.mongodb.casbah.Imports._
 
 object SplunkQueryHelper {
     def unionResultBaseOnUser(left: IQueryable[SensisQueryElement], right: IQueryable[SensisQueryElement], fl: Array[String]): IQueryable[SensisQueryElement] = {
@@ -143,4 +143,69 @@ object SplunkQueryHelper {
       	  	case null => (x.getProperty[String]("location") == y.getProperty[String]("location"))
     		}
   	}
+   
+    def resultUnion(key : String)(xs : IQueryable[SensisQueryElement]) : IQueryable[SensisQueryElement] = {
+    		if(key == "QL") xs
+    		else {
+    			val re = xs.toList.groupBy(x => x.getProperty[String](key)).map { x => 
+    				def sum(ls : List[SensisQueryElement]) : Int = if (ls.isEmpty) 0 else ls.head.getProperty[Int]("times") + sum(ls.tail)
+    				val tmp = new SensisQueryElement
+    				tmp.insertProperty(key, x._1)
+    				tmp.insertProperty("times", sum(xs.toList))
+    				tmp
+    			}
+    			val reVal = new Linq_List[SensisQueryElement]
+    			reVal.coll = re.toList
+    			reVal
+    		}
+    }
+	
+    def unionResult(left : IQueryable[SensisQueryElement], right : IQueryable[SensisQueryElement], fl : Array[String]) : IQueryable[SensisQueryElement] = {
+	  	if (left != null) {
+	  		left.union(right)(x => x.getProperty[String]("query") + x.getProperty[String]("location")) { (x, y) => 
+	  			if (x == null) y
+	  			else if (y == null) x
+	  			else {
+	  				val re = new SensisQueryElement
+	  				re.insertProperty("query", x.getProperty("query"))
+	  				re.insertProperty("location", x.getProperty("location"))
+	  				for (it <- fl) re.insertProperty(it, x.getProperty[Int](it) + y.getProperty[Int](it))
+	  				re
+	  			}
+	  		}
+	  	}
+	  	else right
+    }
+
+    def locationUnionResult(left : IQueryable[SensisQueryElement], right : IQueryable[SensisQueryElement], fl : Array[String]) : IQueryable[SensisQueryElement] = {
+	  	if (left != null) {
+	  		left.union(right)(x => x.getProperty[String]("location")) { (x, y) => 
+	  			if (x == null) y
+	  			else if (y == null) x
+	  			else {
+	  				val re = new SensisQueryElement
+	  				re.insertProperty("location", x.getProperty("location"))
+	  				for (it <- fl) re.insertProperty(it, x.getProperty[Int](it) + y.getProperty[Int](it))
+	  				re
+	  			}
+	  		}
+	  	}
+	  	else right
+    }
+    
+    def queryUnionResult(left : IQueryable[SensisQueryElement], right : IQueryable[SensisQueryElement], fl : Array[String]) : IQueryable[SensisQueryElement] = {
+	  	if (left != null) {
+	  		left.union(right)(x => x.getProperty[String]("query")) { (x, y) => 
+	  			if (x == null) y
+	  			else if (y == null) x
+	  			else {
+	  				val re = new SensisQueryElement
+	  				re.insertProperty("query", x.getProperty("query"))
+	  				for (it <- fl) re.insertProperty(it, x.getProperty[Int](it) + y.getProperty[Int](it))
+	  				re
+	  			}
+	  		}
+	  	}
+	  	else right
+    }
 }

@@ -15,7 +15,7 @@ object URLArgDecoding {
 		var reVal : StringBuilder = new StringBuilder
 		while (index < input.length()) {
 			if (input.charAt(index) == '%') {
-				_level.get(input.subSequence(index, index + 2).toString()) match {
+				_level.get(input.subSequence(index, index + 2).toString().toUpperCase()) match {
 				  case Some(e) => reVal.append(e.asInstanceOf[Char]); index = 3 + index
 				  case none => ;
 				}

@@ -11,16 +11,29 @@ object SplunkQLQuery extends QueryTraits {
 	def isQueryable(property : String) : Boolean = false
 	def query(b : Int, e : Int, p : SensisQueryElement, r : String*) : JSONObject = ??? // only provide tops because it to slow
 	def queryTops(t : Int, b : Int, e : Int, p : SensisQueryElement, r : String*) : JSONObject = {
-		QueryElementToJSON(queryAcc(t, b, e, p, Array("times")).orderbyDecsending(x => x.getProperty[Int]("times")).top(t).toList)
+		val (key, func) = getQueryKey(p)
+//	    QueryElementToJSON(queryAcc(t, b, e, p, Array("times"))(SplunkQueryHelper.resultUnion(key))(func).orderbyDecsending(x => x.getProperty[Int]("times")).top(t).toList)
+	    QueryElementToJSON(queryAcc(t, b, e, p, Array("times"))(func).orderbyDecsending(x => x.getProperty[Int]("times")).top(t).toList)
 	}
 	def queryWithQueryable(b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement] = {
-		queryAcc(-1, b, e, p, Array("times")).orderbyDecsending(x => x.getProperty[Int]("times"))
+		val (key, func) = getQueryKey(p)
+	    queryAcc(-1, b, e, p, Array("times"))(func).orderbyDecsending(x => x.getProperty[Int]("times"))
 	}
 	def queryTopsWithQueryable(t : Int, b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement] = {
-		queryAcc(t, b, e, p, Array("times")).orderbyDecsending(x => x.getProperty[Int]("times")).top(t)
+		val (key, func) = getQueryKey(p)
+	    queryAcc(t, b, e, p, Array("times"))(func).orderbyDecsending(x => x.getProperty[Int]("times")).top(t)
+	}
+
+	private def getQueryKey(p : SensisQueryElement) : (String, (IQueryable[SensisQueryElement], IQueryable[SensisQueryElement], Array[String]) => IQueryable[SensisQueryElement]) = {
+		if (p.contains("query")) ("query", SplunkQueryHelper.queryUnionResult)
+		else if (p.contains("location")) ("location", SplunkQueryHelper.locationUnionResult)
+		else ("QL", SplunkQueryHelper.unionResult)
 	}
 	
-	private def queryAcc(t : Int, b : Int, e : Int, p : SensisQueryElement, r : Array[String]) : IQueryable[SensisQueryElement] = {
+	private def queryAcc(t : Int, b : Int, e : Int, p : SensisQueryElement, r : Array[String])
+//				(resultUnion : IQueryable[SensisQueryElement] => IQueryable[SensisQueryElement])
+				(unionResult : (IQueryable[SensisQueryElement], IQueryable[SensisQueryElement], Array[String]) => IQueryable[SensisQueryElement]) 
+				: IQueryable[SensisQueryElement] = {
 	  	def queryConditions : DBObject = {
 	  	  	val builder = MongoDBObject.newBuilder
 	  	  	for (it <- p) {
@@ -29,30 +42,19 @@ object SplunkQLQuery extends QueryTraits {
 	  	  	
 	  	  	builder.result
 	  	}
+	  	
 	  	def resultConditons(fl : Array[String]) : MongoDBObject => SensisQueryElement = { x => 
-	  	  	var re : SensisQueryElement = new SensisQueryElement
-	  	  	re.insertProperty("query", x.getAsOrElse("query", ""))
-	  	  	re.insertProperty("location", x.getAsOrElse("location", ""))
-	  	  	for (it <- fl) {
-	  	  		re.insertProperty(it, x.getAsOrElse(it, 0))
-	  	  	}
-	  	  	re
-	  	}
-	  	def unionResult(left : IQueryable[SensisQueryElement], right : IQueryable[SensisQueryElement], fl : Array[String]) : IQueryable[SensisQueryElement] = {
-	  		if (left != null) {
-	  		  left.union(right)(x => x.getProperty[String]("query") + x.getProperty[String]("location")) { (x, y) => 
-	  				if (x == null) y
-	  				else if (y == null) x
-	  				else {
-	  					val re = new SensisQueryElement
-	  					re.insertProperty("query", x.getProperty("query"))
-	  					re.insertProperty("location", x.getProperty("location"))
-	  					for (it <- fl) re.insertProperty(it, x.getProperty[Int](it) + y.getProperty[Int](it))
-	  					re
-	  				}
-	  		   }
+	  		var re : SensisQueryElement = new SensisQueryElement
+	  		if (p.contains("query")) re.insertProperty("query", x.getAsOrElse("query", ""))
+	  		else if (p.contains("location")) re.insertProperty("location", x.getAsOrElse("location", ""))
+	  		else {
+	  			re.insertProperty("query", x.getAsOrElse("query", ""))
+	  			re.insertProperty("location", x.getAsOrElse("location", ""))
 	  		}
-	  		else right
+	  		for (it <- fl) {
+	  			re.insertProperty(it, x.getAsOrElse(it, 0))
+	  		}
+	  		re
 	  	}
 
 	  	val fl = r.toArray
@@ -62,7 +64,11 @@ object SplunkQLQuery extends QueryTraits {
 	  	
 	  	var queryCan : IQueryable[SensisQueryElement] = null
 	  	for (i <- b to e) {
-	  		val cur = SplunkDatabaseName.splunk_query_data.format(i)
+	  		val cur = if (p.contains("query")) SplunkDatabaseName.splunk_query_only_data.format(i)
+	  				  else if (p.contains("location")) SplunkDatabaseName.splunk_location_only_data.format(i) 
+	  				  else SplunkDatabaseName.splunk_query_data.format(i)
+
+//	  		val tmp = resultUnion(getQuery(cur))
 	  		val tmp = getQuery(cur)
 	  		queryCan = unionResult(queryCan, tmp, fl)
 	  	}
@@ -84,6 +90,8 @@ object SplunkQLQuery extends QueryTraits {
     }
 
     def getQueryAsList(t: Int, b: Int, e: Int, p: SensisQueryElement, r: Array[String]): List[SensisQueryElement] = {
-        queryAcc(t, b, (b + 7), p, Array("times")).top(t).toList
+		val (key, func) = getQueryKey(p)
+//	    queryAcc(t, b, (b + 7), p, Array("times"))(SplunkQueryHelper.resultUnion(key))(func).top(t).toList
+	    queryAcc(t, b, (b + 7), p, Array("times"))(func).top(t).toList
     }
 }
