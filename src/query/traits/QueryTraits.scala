@@ -33,7 +33,6 @@ object QueryTraitsFactory {
 	def apply(name : String) : QueryTraits = name match {
 	  case "Mashery" => MasheryQuery 
 	  case "SplunkData" => SplunkQuery
-	  case "Relic" => RelicQuery
 	  case "SplunkQuery" => SplunkQLQuery
 	  case _ => ???
 	}
