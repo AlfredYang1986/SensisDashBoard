@@ -24,12 +24,14 @@ abstract class SplunkProxyBase extends APIProxy {
 	val month_pattern_p = new scala.util.matching.Regex("""(\d+)m""", "num")
 	val day_pattern_p = new scala.util.matching.Regex("""(\d+)d""", "num")
 	val week_pattern_p = new scala.util.matching.Regex("""(\d+)w""", "num")
+	val hour_pattern_p = new scala.util.matching.Regex("""(\d+)h""", "num")
 	
 	def getStartDate(duration : String) : Date = duration match {
 	  case day_pattern_p(num) => val cal = Calendar.getInstance(); cal.setTime(new Date()); cal.add(Calendar.DATE, -Integer.parseInt(num)); cal.getTime 
 	  case month_pattern_p(num) => val cal = Calendar.getInstance(); cal.setTime(new Date()); cal.add(Calendar.MONTH, -Integer.parseInt(num)); cal.getTime 
 	  case year_pattern_p(num) => val cal = Calendar.getInstance(); cal.setTime(new Date()); cal.add(Calendar.YEAR, -Integer.parseInt(num)); cal.getTime 
 	  case week_pattern_p(num) => val cal = Calendar.getInstance(); cal.setTime(new Date()); cal.add(Calendar.WEEK_OF_YEAR, -Integer.parseInt(num)); cal.getTime 
+	  case hour_pattern_p(num) => val cal = Calendar.getInstance(); cal.setTime(new Date()); cal.add(Calendar.HOUR, -Integer.parseInt(num)); cal.getTime 
 	  case _ => throw Error_PhraseXML
 	}
 		
