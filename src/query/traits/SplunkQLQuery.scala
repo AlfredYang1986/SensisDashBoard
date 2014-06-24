@@ -12,7 +12,6 @@ object SplunkQLQuery extends QueryTraits {
 	def query(b : Int, e : Int, p : SensisQueryElement, r : String*) : JSONObject = ??? // only provide tops because it to slow
 	def queryTops(t : Int, b : Int, e : Int, p : SensisQueryElement, r : String*) : JSONObject = {
 		val (key, func) = getQueryKey(p)
-//	    QueryElementToJSON(queryAcc(t, b, e, p, Array("times"))(SplunkQueryHelper.resultUnion(key))(func).orderbyDecsending(x => x.getProperty[Int]("times")).top(t).toList)
 	    QueryElementToJSON(queryAcc(t, b, e, p, Array("times"))(func).orderbyDecsending(x => x.getProperty[Int]("times")).top(t).toList)
 	}
 	def queryWithQueryable(b : Int, e : Int, p : SensisQueryElement, r : String*) : IQueryable[SensisQueryElement] = {
@@ -25,19 +24,19 @@ object SplunkQLQuery extends QueryTraits {
 	}
 
 	private def getQueryKey(p : SensisQueryElement) : (String, (IQueryable[SensisQueryElement], IQueryable[SensisQueryElement], Array[String]) => IQueryable[SensisQueryElement]) = {
-		if (p.contains("query")) ("query", SplunkQueryHelper.queryUnionResult)
-		else if (p.contains("location")) ("location", SplunkQueryHelper.locationUnionResult)
+		if (p.contains("query_only")) ("query", SplunkQueryHelper.queryUnionResult)
+		else if (p.contains("location_only")) ("location", SplunkQueryHelper.locationUnionResult)
 		else ("QL", SplunkQueryHelper.unionResult)
 	}
 	
 	private def queryAcc(t : Int, b : Int, e : Int, p : SensisQueryElement, r : Array[String])
-//				(resultUnion : IQueryable[SensisQueryElement] => IQueryable[SensisQueryElement])
 				(unionResult : (IQueryable[SensisQueryElement], IQueryable[SensisQueryElement], Array[String]) => IQueryable[SensisQueryElement]) 
 				: IQueryable[SensisQueryElement] = {
 	  	def queryConditions : DBObject = {
 	  	  	val builder = MongoDBObject.newBuilder
 	  	  	for (it <- p) {
-	  	  		builder += it.name -> it.get
+	  	  		if (it.name != "query_only" && it.name != "location_only")
+	  	  			builder += it.name -> it.get
 	  	  	}
 	  	  	
 	  	  	builder.result
@@ -45,8 +44,8 @@ object SplunkQLQuery extends QueryTraits {
 	  	
 	  	def resultConditons(fl : Array[String]) : MongoDBObject => SensisQueryElement = { x => 
 	  		var re : SensisQueryElement = new SensisQueryElement
-	  		if (p.contains("query")) re.insertProperty("query", x.getAsOrElse("query", ""))
-	  		else if (p.contains("location")) re.insertProperty("location", x.getAsOrElse("location", ""))
+	  		if (p.contains("query_only")) re.insertProperty("query", x.getAsOrElse("query", ""))
+	  		else if (p.contains("location_only")) re.insertProperty("location", x.getAsOrElse("location", ""))
 	  		else {
 	  			re.insertProperty("query", x.getAsOrElse("query", ""))
 	  			re.insertProperty("location", x.getAsOrElse("location", ""))
@@ -59,16 +58,15 @@ object SplunkQLQuery extends QueryTraits {
 
 	  	val fl = r.toArray
 	  	def getQuery(d : String) : IQueryable[SensisQueryElement] = 
-	  		if (t > 0) (from db() in d where queryConditions).selectTop(t)("times")(resultConditons(fl))
+	  		if (t > 0) { val re = (from db() in d where queryConditions).selectTop(t)("times")(resultConditons(fl)); println(re); re }
 	  		else from db() in d where queryConditions select resultConditons(fl)
 	  	
 	  	var queryCan : IQueryable[SensisQueryElement] = null
 	  	for (i <- b to e) {
-	  		val cur = if (p.contains("query")) SplunkDatabaseName.splunk_query_only_data.format(i)
-	  				  else if (p.contains("location")) SplunkDatabaseName.splunk_location_only_data.format(i) 
+	  		val cur = if (p.contains("query_only")) SplunkDatabaseName.splunk_query_only_data.format(i)
+	  				  else if (p.contains("location_only")) SplunkDatabaseName.splunk_location_only_data.format(i) 
 	  				  else SplunkDatabaseName.splunk_query_data.format(i)
 
-//	  		val tmp = resultUnion(getQuery(cur))
 	  		val tmp = getQuery(cur)
 	  		queryCan = unionResult(queryCan, tmp, fl)
 	  	}
@@ -81,7 +79,10 @@ object SplunkQLQuery extends QueryTraits {
 	  			if (con == null) con = tmp_c
 	  			else con = $or(con, tmp_c)
 	  		}
-	  		val cur = SplunkDatabaseName.splunk_query_data.format(i)
+	  		val cur = if (p.contains("query_only")) SplunkDatabaseName.splunk_query_only_data.format(i)
+	  				  else if (p.contains("location_only")) SplunkDatabaseName.splunk_location_only_data.format(i) 
+	  				  else SplunkDatabaseName.splunk_query_data.format(i)
+
 	  		val tmp = from db() in cur where con select resultConditons(fl)
 
             query = unionResult(query, tmp, fl)
@@ -91,7 +92,6 @@ object SplunkQLQuery extends QueryTraits {
 
     def getQueryAsList(t: Int, b: Int, e: Int, p: SensisQueryElement, r: Array[String]): List[SensisQueryElement] = {
 		val (key, func) = getQueryKey(p)
-//	    queryAcc(t, b, (b + 7), p, Array("times"))(SplunkQueryHelper.resultUnion(key))(func).top(t).toList
 	    queryAcc(t, b, (b + 7), p, Array("times"))(func).top(t).toList
     }
 }
