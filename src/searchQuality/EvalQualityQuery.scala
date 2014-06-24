@@ -1,15 +1,12 @@
 package searchQuality
 
 import cache.SearchQualityDBName
-
 import com.mongodb.casbah.Imports._
-
 import scala.util.parsing.json.JSONObject
-
 import query._
 import query.property.QueryElementToJSON
 import query.property.SensisQueryElement
-
+import cache.SplunkDatabaseName
 
 object EvalQualityQuery extends SearchQualityQryTrait {
 
@@ -43,27 +40,25 @@ object EvalQualityQuery extends SearchQualityQryTrait {
 
     var fl: Array[String] = null
     if (arr.length == 1)
-      fl = Array("Name_Search", "Name_Search_Comment", "Type_Search", "Type_Search_Comment", "Concept_Recall", "Concept_Recall_Comment", "Duplicates", "Duplicates_Comment", "Zero_Results", "Zero_Results_Comment")
+      fl = SearchQualityDBName.evaluation_matric_columns
     else
       fl = arr.toArray
 
     if (days == 0)
       dataRecord = from db () in SearchQualityDBName.evaluation_matric_data select queryAsSensisQueryElem(fl)
-    else
+    else {
       dataRecord = from db () in SearchQualityDBName.evaluation_matric_data where ("days" -> days) select queryAsSensisQueryElem(fl)
 
+      if (dataRecord.count < 1) {
+        val prevRec = getPreviousRecord(days)
+        if (prevRec != null)
+          dataRecord = dataRecord :+ prevRec
+      }
+    }
     dataRecord
   }
 
   private def compareBase(begin: Int, end: Int, sqe: SensisQueryElement, arr: Array[String]): List[SensisQueryElement] = {
-
-    def getPreviousRecord(begin: Int) = {
-      val records = from db () in SearchQualityDBName.evaluation_matric_data where ("days" $lt begin) select queryAsSensisQueryElem(SearchQualityDBName.evaluation_matric_columns)
-      val prev = records.orderbyDecsending(x => x.getProperty[Int]("days")).top(1).toList
-
-      if (prev.size >= 1) prev(0)
-      else new SensisQueryElement
-    }
 
     def calcChange(left: String, right: String) = {
       if (left.equals("") || right.equals(""))
@@ -94,7 +89,7 @@ object EvalQualityQuery extends SearchQualityQryTrait {
         val result: SensisQueryElement = getComparison(recordsList(1), recordsList(0))
         result :: List.empty[SensisQueryElement]
       } else
-        recordsList
+        List.empty[SensisQueryElement]
 
     } else if (begin != 0 && end != 0) { /* When both time points defined */
       val left = queryRecord(begin, sqe, arr).toList
@@ -104,7 +99,7 @@ object EvalQualityQuery extends SearchQualityQryTrait {
         val result: SensisQueryElement = getComparison(left(0), right(0))
         result :: List.empty[SensisQueryElement]
       } else
-        right
+        List.empty[SensisQueryElement]
 
     } else if (begin != 0 && end == 0) { /* Only one time point */
       val right = queryRecord(begin, sqe, arr).toList
@@ -115,6 +110,14 @@ object EvalQualityQuery extends SearchQualityQryTrait {
 
     } else
       List.empty[SensisQueryElement]
+  }
+
+  private def getPreviousRecord(begin: Int) = {
+    val records = from db () in SearchQualityDBName.evaluation_matric_data where ("days" $lt begin) select queryAsSensisQueryElem(SearchQualityDBName.evaluation_matric_columns)
+    val prev = records.orderbyDecsending(x => x.getProperty[Int]("days")).top(1).toList
+
+    if (prev.size >= 1) prev(0)
+    else null
   }
 
 }
