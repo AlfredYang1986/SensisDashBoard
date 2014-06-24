@@ -2,9 +2,5 @@
 .classpath
 .project
 bin
-backup
 data
-MongoDBTest/bin
-SplunkDemo/bin
 src/unit_test
-StructFile
