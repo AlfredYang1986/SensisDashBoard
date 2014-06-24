@@ -55,21 +55,19 @@ object SearchQualityQuery extends SearchQualityQryTrait {
 
     if (days == 0)
       dataRecord = from db () in SearchQualityDBName.search_quality_data select queryAsSensisQueryElem(fl)
-    else
+    else {
       dataRecord = from db () in SearchQualityDBName.search_quality_data where ("days" -> days) select queryAsSensisQueryElem(fl)
 
+      if (dataRecord.count < 1) {
+        val prevRec = getPreviousRecord(days)
+        if (prevRec != null)
+          dataRecord = dataRecord :+ prevRec
+      }
+    }
     dataRecord
   }
 
   private def compareBase(begin: Int, end: Int, sqe: SensisQueryElement, arr: Array[String]): List[SensisQueryElement] = {
-
-    def getPreviousRecord(begin: Int) = {
-      val records = from db () in SearchQualityDBName.search_quality_data where ("days" $lt begin) select queryAsSensisQueryElem(SearchQualityDBName.search_quality_columns)
-      val prev = records.orderbyDecsending(x => x.getProperty[Int]("days")).top(1).toList
-
-      if (prev.size >= 1) prev(0)
-      else new SensisQueryElement
-    }
 
     def calcChange(left: String, right: String) = {
       if (left.equals("") || right.equals(""))
@@ -100,7 +98,7 @@ object SearchQualityQuery extends SearchQualityQryTrait {
         val result: SensisQueryElement = getComparison(recordsList(1), recordsList(0))
         result :: List.empty[SensisQueryElement]
       } else
-        recordsList
+        List.empty[SensisQueryElement]
 
     } else if (begin != 0 && end != 0) { /* When both time points defined */
       val left = queryRecord(begin, sqe, arr).toList
@@ -110,7 +108,7 @@ object SearchQualityQuery extends SearchQualityQryTrait {
         val result: SensisQueryElement = getComparison(left(0), right(0))
         result :: List.empty[SensisQueryElement]
       } else
-        right
+        List.empty[SensisQueryElement]
 
     } else if (begin != 0 && end == 0) { /* Only one time point */
       val right = queryRecord(begin, sqe, arr).toList
@@ -136,9 +134,9 @@ object SearchQualityQuery extends SearchQualityQryTrait {
       var dataMap: TreeMap[String, Any] = TreeMap.empty
       for (it <- records) {
         val cal = Calendar.getInstance()
-	  	cal.setTime(BaseTimeSpan.base)
-	  	cal.add(Calendar.DATE, (it.getProperty[Int]("days")))
-	  	
+        cal.setTime(BaseTimeSpan.base)
+        cal.add(Calendar.DATE, (it.getProperty[Int]("days")))
+
         dataMap += (new SimpleDateFormat("yyyy-MM-dd").format(cal.getTime()) -> it.getProperty[String]("%s".format(sourceInput)))
       }
       dataMap
@@ -146,4 +144,12 @@ object SearchQualityQuery extends SearchQualityQryTrait {
     } else TreeMap.empty[String, String]
   }
 
+  private def getPreviousRecord(begin: Int) = {
+    val records = from db () in SearchQualityDBName.search_quality_data where ("days" $lt begin) select queryAsSensisQueryElem(SearchQualityDBName.search_quality_columns)
+    val prev = records.orderbyDecsending(x => x.getProperty[Int]("days")).top(1).toList
+
+    if (prev.size >= 1) prev(0)
+    else null
+  }
 }
+
