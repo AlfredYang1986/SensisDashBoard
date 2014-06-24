@@ -70,11 +70,11 @@ object SplunkQueryLocationCache extends SplunkCache {
 	  	  case Some(e) => ql += (q + l -> unionDBObject(e))
 	  	  case none => ql += (q + l -> newDBObject)
 	  	}	
-	  	qOnly.get(q + l) match {
+	  	qOnly.get(q) match {
 	  	  case Some(e) => qOnly += (q -> unionDBObject(e))
 	  	  case none => qOnly += (q -> newQueryOnlyDBObject)
 	  	}	
-	  	lOnly.get(q + l) match {
+	  	lOnly.get(l) match {
 	  	  case Some(e) => lOnly += (l -> unionDBObject(e))
 	  	  case none => lOnly += (l -> newLocationOnlyDBObject)
 	  	}	
