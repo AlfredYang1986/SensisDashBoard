@@ -24,5 +24,5 @@ object SearchQualityDBName {
   def search_quality_data = "search_quality_data"
   def search_quality_columns = Array("days", "SAPI", "SAPI_Comment", "Yellow", "Yellow_Comment", "One_Search", "One_Search_Comment")
   def evaluation_matric_data = "eval_matric_data"
-  def evaluation_matric_columns = Array("Name_Search", "Name_Search_Comment", "Type_Search", "Type_Search_Comment", "Concept_Recall", "Concept_Recall_Comment", "Duplicates", "Duplicates_Comment", "Zero_Results", "Zero_Results_Comment")
+  def evaluation_matric_columns = Array("Name_Search", "Name_Search_Comment", "Type_Search", "Type_Search_Comment", "Concept_Recall", "Concept_Recall_Comment", "Duplicates", "Duplicates_Comment", "Zero", "Zero_Comment")
 }
