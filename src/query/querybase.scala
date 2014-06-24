@@ -10,7 +10,6 @@ import com.mongodb.casbah.query.dsl.QueryExpressionObject
 
 object _data_connection {
 	def conn_name : String = "SensisSAPIdb"
-//	def conn_name : String = "Alfred_Test"
 
 	val _conn = MongoConnection()
 	var _conntion : Map[String, MongoCollection] = Map.empty
@@ -23,7 +22,7 @@ object _data_connection {
 	
 	def resetCollection(coll_name : String) : Unit = getCollection(coll_name).drop
 	
-	def isExisted(coll_name : String) : Boolean = getCollection(coll_name).isEmpty
+	def isExisted(coll_name : String) : Boolean = !getCollection(coll_name).isEmpty
 	
 	def releaseConntions = _conntion = Map.empty
 }
