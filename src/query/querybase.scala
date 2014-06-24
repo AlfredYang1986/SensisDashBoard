@@ -22,7 +22,7 @@ object _data_connection {
 	
 	def resetCollection(coll_name : String) : Unit = getCollection(coll_name).drop
 	
-	def isExisted(coll_name : String) : Boolean = !getCollection(coll_name).isEmpty
+	def isExisted(coll_name : String) : Boolean = !(getCollection(coll_name).isEmpty)
 	
 	def releaseConntions = _conntion = Map.empty
 }
