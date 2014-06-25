@@ -17,11 +17,12 @@ import java.text.SimpleDateFormat
 import com.splunk.Service
 import java.util.Date
 import java.util.Calendar
+import sensis.APIArgsStringListHelper
 
 object SplunkProxy extends SplunkProxyBase {
   
   	def index : String = """index="ssapi_prod""""
-	def source_type : String = "sourcetype=access_combined"
+	def source_type : String = """sourcetype="access_combined""""
   	override def getStartDate(duration : String) : Date = duration match {
 		case "test" => date_format.parse("03/31/2014:03:00:00")
 		case _ => super.getStartDate(duration)
@@ -35,8 +36,8 @@ object SplunkProxy extends SplunkProxyBase {
 	override def request(url: String, key: APIKeyBase, args: APIArgumentsBase) = {
 		callback("start")
 		callback("property")
-		val ek = args.asInstanceOf[APISplunkArguments].args.get("external").get.asInstanceOf[String]
-		callback(ek)
+		val ek = args.asInstanceOf[APISplunkArguments].args.get("external").get.asInstanceOf[APIArgsStringListHelper]
+		for (it <- ek.ls) callback(it)
 		callback("store")
 		super.request(url, key, args)
 		callback("end")

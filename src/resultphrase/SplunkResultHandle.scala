@@ -53,7 +53,7 @@ object store extends state {
 object SplunkResultHandle extends ResultHandle {
 	val cache = new SplunkCacheFacade
 	var cur : state = none
-	var special_key : String = null
+	var special_key : List[String] = null
 
 	def start = {
 		cache.cleanAll
@@ -61,7 +61,7 @@ object SplunkResultHandle extends ResultHandle {
 	}
 	def end = cache.synchonaizeAll("raw", "raw_yello", "endpoint", "query")
 
-	def saveKey(k : String) = special_key = k
+	def saveKey(k : String) = special_key = special_key :+ k
 	
 	def apply_acc(result : String) = {
 		def getUserKey(mp: Map[String, String]): String =
@@ -99,7 +99,7 @@ object SplunkResultHandle extends ResultHandle {
 			re
 		}
 
-		def fromYelloPage(k : String) : String = if (k == special_key) "raw_yello" else "raw"
+		def fromYelloPage(k : String) : String = if (special_key.contains(k)) "raw_yello" else "raw"
 		  
 		def addQueryLocationPair(argsMap : Map[String, String], days : Int) = {
 			def getUserQuery(): String =
